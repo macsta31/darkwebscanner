@@ -1,56 +1,195 @@
-<script>
+<script lang="ts">
     import { fly } from 'svelte/transition'
     import { onMount } from 'svelte'
-    import { enhance } from '$app/forms';
+    import { scan } from '../scan'
+    // import { Spinner } from 'flowbite-svelte'
+    import Results from '../components/Results.svelte';
+
+    let selected = null;
+
+    function selectLeak(leak: { Name: any; }) {
+        selected = leak.Name;
+        console.log(selected);
+    }
+    /**
+     * @type {string}
+     */
+    let searchParam: any;
+
+    /**
+     * @type {Promise<void>}
+     */
+    let promise:Promise<any>|null = null;
+
+
+    let scanResult: any = null
+    let searching = false
+
+    async function handleSubmit() {
+        searching = true
+        if(searchParam){
+            promise = scan(searchParam).then((result) => {
+                scanResult = result;
+                searching = false  // save the result in api_data
+                console.log(result)
+                return result;  // make sure to return the result so it's passed to the 'then' block
+            })
+            .catch((err) => {
+                searching = false;
+                console.log(err)
+            })
+        }}
+        
 
     let showSvg = false
+
+
     
     onMount(() => {
         showSvg = true
     })
 
-    export let data;
+    
 </script>
-
-<main>
-    <section>
-        <h1>Has Your Information Been Leaked Online?</h1>
-        <h3>Enter Your Email Below To Find Out</h3>
-
-        <form method="POST" use:enhance>
+<div id="wrapper">
+    
+    <main>
+        <section>
+            <h1>Has Your Information Been Leaked Online?</h1>
+            <h3>Enter Your Email Below To Find Out</h3>
+            {#if !searching}
+            <form on:submit|preventDefault={handleSubmit} >
+                    <input name="searchParam" type="text" bind:value={searchParam}>
+                    <button type="submit">
+                            Search
+                    </button>
+            </form>
+            {:else}
+                <progress />
+            {/if}
+            {#if showSvg}
+                <div class="custom-shape-divider-bottom-1688128729">
+                    <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 120" preserveAspectRatio="none">
+                        <path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" opacity=".25" class="shape-fill" transition:fly={{y: -200, duration: 1000, delay:0}}></path>
+                        <path d="M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z" opacity=".5" class="shape-fill" transition:fly={{y: -200, duration: 2000, delay:100}}></path>
+                        <path d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z" class="shape-fill" transition:fly={{y: -200, duration: 1000, delay:400}}></path>
+                    </svg>
+                </div>
+            {/if}
             
-            <input name="searchParam" type="text">
-            <button type="submit">Search</button>
-        </form>
-    </section>
-    {#if showSvg}
-        <div id="divider">
-            <svg id="svg1"width="1440" height="325" viewBox="0 0 1440 238" fill="none" xmlns="http://www.w3.org/2000/svg" transition:fly={{ y:200, duration: 1000, delay: 0}}>
-                <path d="M0 56.8476L48 54.3431C96 51.8387 192 46.8298 288 70.3718C384 93.4129 480 145.506 576 124.468C672 103.431 768 10.2645 864 0.747479C960 -8.2686 1056 66.8655 1152 86.9012C1248 106.937 1344 71.8744 1392 54.3431L1440 36.8119V703H1392C1344 703 1248 703 1152 703C1056 703 960 703 864 703C768 703 672 703 576 703C480 703 384 703 288 703C192 703 96 703 48 703H0V56.8476Z" fill="#475DE2"/>
-            </svg>
-            <svg id="svg2"width="1440" height="250" viewBox="0 0 1440 155" fill="none" xmlns="http://www.w3.org/2000/svg" transition:fly={{ y:200, duration: 1000, delay: 200}}>
-                <path d="M0 80.2924L48 92.4357C96 105.254 192 129.541 288 99.1821C384 68.8235 480 -16.1803 576 2.70944C672 21.5992 768 145.732 864 169.344C960 192.956 1056 116.048 1152 90.4119C1248 64.7758 1344 89.0627 1392 101.881L1440 114.024V620H1392C1344 620 1248 620 1152 620C1056 620 960 620 864 620C768 620 672 620 576 620C480 620 384 620 288 620C192 620 96 620 48 620H0V80.2924Z" fill="#3648D5"/>
-            </svg>
-            <svg id="svg3"width="1440" height="200" viewBox="0 0 1440 199" fill="none" xmlns="http://www.w3.org/2000/svg" transition:fly={{ y:200, duration: 1000, delay: 300}}>
-                <path d="M0 48.3341L48 84.7063C96 120.095 192 192.839 288 176.128C384 159.416 480 55.2152 576 16.8771C672 -20.478 768 9.01296 864 58.1644C960 107.316 1056 176.128 1152 183.009C1248 188.907 1344 133.858 1392 105.35L1440 77.825V589H1392C1344 589 1248 589 1152 589C1056 589 960 589 864 589C768 589 672 589 576 589C480 589 384 589 288 589C192 589 96 589 48 589H0V48.3341Z" fill="#2433C7"/>
-            </svg>
-            <svg id="svg4"width="1440" height="320" viewBox="0 0 1440 318" fill="none" xmlns="http://www.w3.org/2000/svg" transition:fly={{ y:200, duration: 1000, delay: 100}}>
-                <path d="M0 135.178L48 117.505C96 99.4996 192 64.1547 288 83.4944C384 102.834 480 177.525 576 165.855C672 154.184 768 56.1521 864 19.4734C960 -17.2052 1056 7.46956 1152 16.8059C1248 26.1423 1344 20.8072 1392 17.8062L1440 15.1387V612H1392C1344 612 1248 612 1152 612C1056 612 960 612 864 612C768 612 672 612 576 612C480 612 384 612 288 612C192 612 96 612 48 612H0V135.178Z" fill="#5871EE"/>
-            </svg>
-        </div>
-    {/if}
-</main>
+        </section>
+        
+       
+    </main>
+    <!-- <button on:click={() => console.log('HELLO')} >hello  </button> -->
+        {#if promise}
+            {#await promise then value}
+                <div id="resultswrapper">
+                    <div class="custom-shape-divider-bottom-1688128729" id="flipped">
+                        <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 120" preserveAspectRatio="none">
+                            <path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" opacity=".25" class="shape-fill" ></path>
+                            <path d="M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z" opacity=".5" class="shape-fill"></path>
+                            <path d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z" class="shape-fill"></path>
+                        </svg>
+                    </div>
+                    <div class="scanresults">
+                        <!-- {JSON.stringify(value, null, 2)} -->
+                        <Results leaks={value} />
+                        
+                    </div>
+                    <footer>
+                        <a href="https://haveibeenpwned.com">All data provided by Have I Been Pwned</a>
+                    </footer>
+                </div>
+                {:catch error}
+                    <div class="scanresults_error">
+                        {error.message}
+                    </div>
+            {/await}
+        {/if}
+</div>
+
 
 <style>
 
-    main{
+    progress{
+        max-width: 100%;
+        padding: 1rem;
+    }
+    footer{
+        display: grid;
+        place-content: center;
+        padding: 2rem;
+    }
+
+    footer > a {
+        font-size: 0.5rem;
+    }
+    
+
+    #flipped{
+        transform: rotateY(180deg);
+        top:0;
+    }
+
+    #resultswrapper{
+        position: relative;
+        background-color: var(--background);
+    }
+
+    #wrapper{
+        min-height: 85%;
+    }
+
+    .scanresults{
+        position: relative;
+        overflow: hidden;
+        padding-top: 15rem;
+        padding-bottom: 5rem;
+        z-index: 10;
+        display: grid;
+        grid-template-columns: 1fr 3fr;
+        column-gap: 2rem;
+        width: 100%;
+
+    }
+
+    .scanresults_error{
+        width: 400px;
+        background-color: red;
+    }
+
+    .custom-shape-divider-bottom-1688128729 {
         position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        overflow: hidden;
+        line-height: 0;
+        transform: rotate(180deg);
+        z-index: 1;
+        /* height: min-content; */
+    }
+
+    .custom-shape-divider-bottom-1688128729 svg {
+        pointer-events: none;
+        position: relative;
+        display: block;
+        width: calc(138% + 1.3px);
+        height: 16rem;
+    }
+
+    .custom-shape-divider-bottom-1688128729 .shape-fill {
+        fill: var(--accent);
+    }
+
+    main{
         display: flex;
-        height: 100%;
+        flex-direction: column;
+        min-height: 100%;
         flex: 1 auto;
         width:100%;
-        justify-content: center;
-        padding-top: 6rem;
+        align-items: center;
         overflow: hidden;
     }
     section{
@@ -64,6 +203,10 @@
 
     h1{
         font-size:2rem;
+        text-align: center;
+    }
+    h3{
+        text-align: center;
     }
 
     form{
@@ -90,43 +233,12 @@
     }
 
     button{
+        position: relative;
         background-color: var(--accent);
         padding: 0.5rem 1.5rem;
         border-radius: 10px;
         font-size: 1rem;
-    }
 
-    #divider {
-        overflow: hidden;
-        position: absolute;
-        bottom: 0;
-        left:0;
-
-    }
-
-    svg{
-        width:100%;
-        z-index: 999;
-        
-    }
-
-    #svg1{
-        position: absolute;
-        bottom:0;
-        left:0;
-        z-index: 2;
-    }
-    #svg2{
-        position: absolute;
-        bottom:0;
-        left:0;
-        z-index: 9;
-    }
-    #svg3{
-        position: absolute;
-        bottom:0;
-        left:0;
-        z-index: 9;
     }
     
 

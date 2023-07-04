@@ -15,6 +15,11 @@
 
 }
 
+::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari and Opera */
+}
+
+
 button{
     background: transparent;
     border:none;
@@ -25,6 +30,9 @@ body{
 }
 
 html, body {
+    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none;  /* IE and Edge */
+    overflow: -moz-scrollbars-none;  /* older Firefox */
     height: 100vh;
     margin: 0;
     display: flex;

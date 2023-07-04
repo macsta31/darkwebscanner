@@ -1,8 +1,9 @@
 <script lang="ts">
     import type { LayoutData } from './$types';
+    
     import '../global.css'
     
-    export let data: LayoutData;
+    // export let data: LayoutData;
 </script>
 
 <main>
@@ -19,17 +20,18 @@
     
     <slot />
 
-    <!-- <footer>
-        <a href="https://haveibeenpwned.com">All data provided by Have I Been Pwned</a>
-    </footer> -->
+    
 </main>
 
 <style>
     main{
+        overflow-x: hidden;
         position: relative;
-        height: 100%;
+        min-height: 100%;
         display: flex;
         flex-direction: column;
+        width: 100%;
+        max-width: 1400px;
     }
 
     header{
@@ -42,6 +44,7 @@
         align-items: center;
         justify-content: space-between;
         padding: 0.5rem 3rem;
+        z-index: 1000
     }
 
     nav{
@@ -59,15 +62,5 @@
 
     a{
         text-decoration: none;
-    }
-
-    footer{
-        position: absolute;
-        bottom: -300;
-        left:0;
-        display: grid;
-        width: 100%;
-        padding: 0.5rem;
-        place-content: center;
     }
 </style>
