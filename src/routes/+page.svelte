@@ -2,7 +2,7 @@
     import { fly } from 'svelte/transition'
     import { onMount } from 'svelte'
     import { scan } from '../scan'
-    // import { Spinner } from 'flowbite-svelte'
+    import Loader from '../components/Loader.svelte';
     import Results from '../components/Results.svelte';
 
     let selected = null;
@@ -65,7 +65,7 @@
                     </button>
             </form>
             {:else}
-                <progress />
+                <Loader />
             {/if}
             {#if showSvg}
                 <div class="custom-shape-divider-bottom-1688128729">
@@ -112,10 +112,6 @@
 
 <style>
 
-    progress{
-        max-width: 100%;
-        padding: 1rem;
-    }
     footer{
         display: grid;
         place-content: center;
