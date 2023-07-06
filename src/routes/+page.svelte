@@ -188,7 +188,7 @@
         overflow: hidden;
         line-height: 0;
         transform: rotate(180deg);
-        z-index: -999;
+        z-index: 1;
     }
 
     .custom-shape-divider-bottom-1688128729 svg {
@@ -196,7 +196,7 @@
         position: relative;
         display: block;
         width: calc(138% + 1.3px);
-        height: 25rem;
+        height: 20rem;
     }
 
     .custom-shape-divider-bottom-1688128729 .shape-fill {
