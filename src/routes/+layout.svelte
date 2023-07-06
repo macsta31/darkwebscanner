@@ -10,10 +10,8 @@
     <header>
         <h1>ISAIX</h1>
         <nav>
-            <a href="/">Nav</a>
-            <a href="/">Nav</a>
-            <a href="/">Nav</a>
-            <a href="/">Nav</a>
+            <a href="/blog">Blog</a>
+            <a href="/news">News</a>
             <button>Contact Us</button>
         </nav>
     </header>
@@ -31,7 +29,6 @@
         display: flex;
         flex-direction: column;
         width: 100%;
-        max-width: 1400px;
     }
 
     header{

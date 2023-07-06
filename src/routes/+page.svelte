@@ -5,6 +5,7 @@
     import Loader from '../components/Loader.svelte';
     import Results from '../components/Results.svelte';
 
+
     let selected = null;
 
     function selectLeak(leak: { Name: any; }) {
@@ -24,13 +25,29 @@
 
     let scanResult: any = null
     let searching = false
+    let emailNotification = false;
+
+    async function sendEmail(){
+        const response = await fetch('/email', {
+            method: 'POST',
+            body: JSON.stringify({ searchParam, scanResult }),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        console.log(response)
+    }
 
     async function handleSubmit() {
         searching = true
+        console.log(emailNotification)
         if(searchParam){
             promise = scan(searchParam).then((result) => {
                 scanResult = result;
                 searching = false  // save the result in api_data
+                if(emailNotification) {
+                    sendEmail()
+                }
                 console.log(result)
                 return result;  // make sure to return the result so it's passed to the 'then' block
             })
@@ -43,7 +60,7 @@
 
     let showSvg = false
 
-
+    
     
     onMount(() => {
         showSvg = true
@@ -59,15 +76,24 @@
             <h3>Enter Your Email Below To Find Out</h3>
             {#if !searching}
             <form on:submit|preventDefault={handleSubmit} >
+                <div class="formsection">
                     <input name="searchParam" type="text" bind:value={searchParam}>
                     <button type="submit">
                             Search
                     </button>
+                </div>
+                    <label for="email" class="emailcheck">
+                        Receive results by email?
+                        <input type="checkbox" bind:checked={emailNotification} />
+                    </label>
             </form>
             {:else}
                 <Loader />
             {/if}
-            {#if showSvg}
+            
+            
+        </section>
+        {#if showSvg}
                 <div class="custom-shape-divider-bottom-1688128729">
                     <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 120" preserveAspectRatio="none">
                         <path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" opacity=".25" class="shape-fill" transition:fly={{y: -200, duration: 1000, delay:0}}></path>
@@ -76,9 +102,6 @@
                     </svg>
                 </div>
             {/if}
-            
-        </section>
-        
        
     </main>
     <!-- <button on:click={() => console.log('HELLO')} >hello  </button> -->
@@ -134,7 +157,9 @@
     }
 
     #wrapper{
-        min-height: 85%;
+        /* min-height: 100%; */
+        flex: 1;
+        display: grid;
     }
 
     .scanresults{
@@ -164,7 +189,6 @@
         line-height: 0;
         transform: rotate(180deg);
         z-index: 1;
-        /* height: min-content; */
     }
 
     .custom-shape-divider-bottom-1688128729 svg {
@@ -172,7 +196,7 @@
         position: relative;
         display: block;
         width: calc(138% + 1.3px);
-        height: 16rem;
+        height: 20rem;
     }
 
     .custom-shape-divider-bottom-1688128729 .shape-fill {
@@ -182,6 +206,7 @@
     main{
         display: flex;
         flex-direction: column;
+        position:relative;
         min-height: 100%;
         flex: 1 auto;
         width:100%;
@@ -193,8 +218,9 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        padding-top: 6rem;
+        padding-top: 10%;
         gap: 0.75rem;
+        height: 100%;
     }
 
     h1{
@@ -209,14 +235,34 @@
         margin-top: 1rem;
         width:100%;
         display: flex;
+        flex-direction: column;
         flex-wrap: wrap;
         justify-content: center;
         gap: 1rem;
     }
+    
+    .formsection{
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .emailcheck{
+        display: grid;
+        place-content: center;
+        justify-items: center;
+    }
+    .emailcheck > *{
+        flex: 1;
+        width: min-content;
+    }
+    .emailcheck > input{
+        padding: 1rem;
+    }
 
     input{
         border:none;
-        flex: 10;
+        flex: 5;
         padding: 0.25rem 1.5rem;
         text-align: center;
         border-radius: 10px;
@@ -234,7 +280,20 @@
         padding: 0.5rem 1.5rem;
         border-radius: 10px;
         font-size: 1rem;
+        transition: all 1s ease;
+        flex: 1;
+        box-shadow: inset 5px 5px 15px rgb(47, 63, 198), inset -5px -5px 15px rgb(47, 63, 198);
 
+    }
+
+    button:hover{
+        cursor: pointer;
+        transform:scale(1.02);
+    }
+
+    button:active{
+        transform: scale(0.98);
+        box-shadow: inset 5px 5px 10px rgb(36, 47, 150), inset -5px -5px 10px rgb(36, 47, 150);
     }
     
 
