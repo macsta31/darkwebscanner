@@ -22,6 +22,8 @@
      */
     let promise:Promise<any>|null = null;
 
+    // $: console.log(emailNotification)
+
 
     let scanResult: any = null
     let searching = false
@@ -84,7 +86,7 @@
                 </div>
                     <label for="email" class="emailcheck">
                         Receive results by email?
-                        <input type="checkbox" bind:checked={emailNotification} />
+                        <input class="checkbox" type="checkbox" bind:checked={emailNotification} />
                     </label>
             </form>
             {:else}
@@ -157,7 +159,6 @@
     }
 
     #wrapper{
-        /* min-height: 100%; */
         flex: 1;
         display: grid;
     }
@@ -207,8 +208,8 @@
         display: flex;
         flex-direction: column;
         position:relative;
-        min-height: 100%;
-        flex: 1 auto;
+        min-height: 100svh;
+        flex: 1;
         width:100%;
         align-items: center;
         overflow: hidden;
@@ -232,6 +233,7 @@
     }
 
     form{
+        z-index: 10;
         margin-top: 1rem;
         width:100%;
         display: flex;
