@@ -14,9 +14,10 @@ export async function POST({ request }) {
       user: env.VITE_EMAIL,
       pass: env.VITE_PW
     },
-    port: 465, // Use port 465 for secure SMTP
-    secure: true
-  });
+    port: 587, // Use port 587 for secure SMTP
+    secure: false, // Use STARTTLS to upgrade the connection to secure
+});
+
 
   // console.log(searchParam, scanResult)
   const mailOptions = {
