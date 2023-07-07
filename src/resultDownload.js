@@ -11,7 +11,7 @@
         <title>Data Display</title>
         </head>
         <body>
-        <h1>Data Display</h1>
+        <h1>Data Display</h1> 
         `;
 
         leaks.forEach((element) => {
