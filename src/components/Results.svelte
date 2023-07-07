@@ -13,6 +13,7 @@
     let scrollIndicator: HTMLDivElement;
     let html;
 
+
     let threatColor = "green";
 
     $: if (selected.avgThreatLevel <= 3) {
@@ -61,7 +62,7 @@
     };
 
     onMount(async () => {
-        const response = await fetch('/src/lib/threatLevels.csv');
+        const response = await fetch('/threatLevels.csv');
         const csvData = await response.text();
 
         const data: DataClass[] = d3.csvParse(csvData);
