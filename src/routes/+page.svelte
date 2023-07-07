@@ -112,9 +112,13 @@
                             <path d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z" class="shape-fill"></path>
                         </svg>
                     </div>
-                    <div class="scanresults">
-                        <Results leaks={value} />
-                        
+                    <div>
+                        <h2 style="padding-bottom: 2rem; text-align: center; font-size: 2rem">Scan Results for  {searchParam}</h2>
+                        <div class="scanresults">
+                            
+                            <Results leaks={value} />
+                            
+                        </div>
                     </div>
                     <footer>
                         <a href="https://haveibeenpwned.com">All data provided by Have I Been Pwned</a>
