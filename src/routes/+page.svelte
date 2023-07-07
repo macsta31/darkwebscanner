@@ -71,31 +71,28 @@
     
 </script>
 <div id="wrapper">
-    
-    <main>
-        <section>
-            <h1>Has Your Information Been Leaked Online?</h1>
-            <h3>Enter Your Email Below To Find Out</h3>
-            {#if !searching}
-            <form on:submit|preventDefault={handleSubmit} >
-                <div class="formsection">
-                    <input name="searchParam" type="text" bind:value={searchParam}>
-                    <button type="submit">
-                            Search
-                    </button>
-                </div>
-                    <label for="email" class="emailcheck">
-                        Receive results by email?
-                        <input class="checkbox" type="checkbox" bind:checked={emailNotification} />
-                    </label>
-            </form>
-            {:else}
-                <Loader />
-            {/if}
-            
-            
-        </section>
-        {#if showSvg}
+        <section style="padding-bottom: 20rem;">
+            <div class="formdiv">
+                <h1>Has Your Information Been Leaked Online?</h1>
+                <h3>Enter Your Email Below To Find Out</h3>
+                {#if !searching}
+                <form on:submit|preventDefault={handleSubmit} >
+                    <div class="formsection">
+                        <input name="searchParam" type="text" bind:value={searchParam}>
+                        <button type="submit">
+                                Search
+                        </button>
+                    </div>
+                        <label for="email" class="emailcheck">
+                            Receive results by email?
+                            <input class="checkbox" type="checkbox" bind:checked={emailNotification} />
+                        </label>
+                </form>
+                {:else}
+                    <Loader />
+                {/if}  
+            </div>
+            {#if showSvg}
                 <div class="custom-shape-divider-bottom-1688128729">
                     <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 120" preserveAspectRatio="none">
                         <path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" opacity=".25" class="shape-fill" transition:fly={{y: -200, duration: 1000, delay:0}}></path>
@@ -104,13 +101,11 @@
                     </svg>
                 </div>
             {/if}
-       
-    </main>
-    <!-- <button on:click={() => console.log('HELLO')} >hello  </button> -->
+        </section>
         {#if promise}
             {#await promise then value}
-                <div id="resultswrapper">
-                    <div class="custom-shape-divider-bottom-1688128729" id="flipped">
+                <section id="results" style="padding-top: 20rem;">
+                    <div class="custom-shape-divider-top-1688128729" id="flipped">
                         <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 120" preserveAspectRatio="none">
                             <path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" opacity=".25" class="shape-fill" ></path>
                             <path d="M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z" opacity=".5" class="shape-fill"></path>
@@ -118,14 +113,13 @@
                         </svg>
                     </div>
                     <div class="scanresults">
-                        <!-- {JSON.stringify(value, null, 2)} -->
                         <Results leaks={value} />
                         
                     </div>
                     <footer>
                         <a href="https://haveibeenpwned.com">All data provided by Have I Been Pwned</a>
                     </footer>
-                </div>
+                </section>
                 {:catch error}
                     <div class="scanresults_error">
                         {error.message}
@@ -136,51 +130,87 @@
 
 
 <style>
-
-    footer{
-        display: grid;
-        place-content: center;
-        padding: 2rem;
-    }
-
-    footer > a {
-        font-size: 0.5rem;
-    }
-    
-
-    #flipped{
-        transform: rotateY(180deg);
-        top:0;
-    }
-
-    #resultswrapper{
-        position: relative;
-        background-color: var(--background);
-    }
-
     #wrapper{
-        flex: 1;
-        display: grid;
+        display: flex;
+        flex-direction: column;
+        flex: 1 auto;
     }
-
-    .scanresults{
+    section{
         position: relative;
-        overflow: hidden;
-        padding-top: 15rem;
-        padding-bottom: 5rem;
-        z-index: 10;
-        display: grid;
-        grid-template-columns: 1fr 3fr;
-        column-gap: 2rem;
-        width: 100%;
-
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        margin-top: 15%;
+        
     }
+    .formdiv{
+        display: flex;
+        flex-direction:column;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    h1{
+        font-size: 3rem;
+        text-align: center;
+    }
+    h3{
+        font-size: 2rem;
+        text-align: center;
+    }
+    form{
+        width: 60%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .formsection{
+        display: flex;
+        flex-wrap: wrap;
+        width: 100%;
+        gap: 1rem;
+    }
+
+    .formsection > input{
+        flex: 5;
+        border-radius: 0.5rem;
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+        text-align: center;
+        border: none;
+    }
+
+    .formsection > input:focus{
+        outline: none;
+        border: none;
+    }
+
 
     .scanresults_error{
         width: 400px;
         background-color: red;
     }
+    .custom-shape-divider-top-1688128729{
+        position: absolute;
+        top:0;
+        left:0;
+        width: 100%;
+        overflow:hidden;
+        transform: rotate(0deg);
+    }
+    .custom-shape-divider-top-1688128729 svg {
+        pointer-events: none;
+        position: relative;
+        display: block;
+        width: calc(138% + 1.3px);
+        height: 20rem;
+    }
 
+    .custom-shape-divider-top-1688128729 .shape-fill {
+        fill: var(--accent);
+    }
     .custom-shape-divider-bottom-1688128729 {
         position: absolute;
         bottom: 0;
@@ -189,7 +219,7 @@
         overflow: hidden;
         line-height: 0;
         transform: rotate(180deg);
-        z-index: 1;
+        z-index: -999;
     }
 
     .custom-shape-divider-bottom-1688128729 svg {
@@ -204,77 +234,7 @@
         fill: var(--accent);
     }
 
-    main{
-        display: flex;
-        flex-direction: column;
-        position:relative;
-        min-height: 100svh;
-        flex: 1;
-        width:100%;
-        align-items: center;
-        overflow: hidden;
-    }
-    section{
-        width:max-content;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding-top: 10%;
-        gap: 0.75rem;
-        height: 100%;
-    }
 
-    h1{
-        font-size:2rem;
-        text-align: center;
-    }
-    h3{
-        text-align: center;
-    }
-
-    form{
-        z-index: 10;
-        margin-top: 1rem;
-        width:100%;
-        display: flex;
-        flex-direction: column;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 1rem;
-    }
-    
-    .formsection{
-        display: flex;
-        gap: 1rem;
-        flex-wrap: wrap;
-    }
-
-    .emailcheck{
-        display: grid;
-        place-content: center;
-        justify-items: center;
-    }
-    .emailcheck > *{
-        flex: 1;
-        width: min-content;
-    }
-    .emailcheck > input{
-        padding: 1rem;
-    }
-
-    input{
-        border:none;
-        flex: 5;
-        padding: 0.25rem 1.5rem;
-        text-align: center;
-        border-radius: 10px;
-        color: black;
-        font-size: 1rem;
-
-        &:focus{
-            outline: none;
-        }
-    }
 
     button{
         position: relative;
@@ -298,6 +258,33 @@
         box-shadow: inset 5px 5px 10px rgb(36, 47, 150), inset -5px -5px 10px rgb(36, 47, 150);
     }
     
+
+    #results{
+        margin-top: 0;
+        display: flex;
+        flex-direction: column;
+        
+    }
+
+    .scanresults{
+        width: 100%;
+        display: flex;
+        padding-bottom: 10rem;
+        gap: 3rem;
+        height: min-content;
+    }
+
+    footer{
+        width: 100%;
+        display: grid;
+        place-content: center;
+        font-size: 0.3rem;
+        padding-bottom: 1rem;
+    }
+
+    input{
+        color: black;
+    }
 
 
 </style>

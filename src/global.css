@@ -33,8 +33,7 @@ html, body {
     scrollbar-width: none;  /* Firefox */
     -ms-overflow-style: none;  /* IE and Edge */
     overflow: -moz-scrollbars-none;  /* older Firefox */
-    height: 100vh;
+    height: 100%;
     margin: 0;
-    display: flex;
-    flex-direction: column;
+    padding: 0;
 }

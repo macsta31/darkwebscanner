@@ -29,17 +29,17 @@
     main{
         overflow-x: hidden;
         position: relative;
-        min-height: 100%;
+        min-height: 100svh;
         display: flex;
         flex-direction: column;
-        width: 100%;
+        /* width: 100%; */
     }
 
     header{
         position: sticky;
         top:0;
         left:0;
-        min-width: 100%;
+        width: 100%;
         background-color: var(--background);
         display: flex;
         align-items: center;

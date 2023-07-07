@@ -1,30 +1,103 @@
-<script>
+<script lang="ts">
     /**
      * @type {any}
      */
-    export let leaks
+    export let leaks:any
     /**
    * @type {HTMLElement}
    */
-    let container
+    let container: HTMLElement
     /**
    * @type {HTMLDivElement}
    */
-    let scrollIndicator;
+    let scrollIndicator: HTMLDivElement;
     let html;
+
+    let threatColor = "green";
+
+    $: if (selected.avgThreatLevel <= 3) {
+        threatColor = "green";
+    } else if (selected.avgThreatLevel <= 6) {
+        threatColor = "orange";
+    } else {
+        threatColor = "red";
+    }
 
     import { onMount, afterUpdate } from 'svelte';
     import downloadData from '../resultDownload';
+    import * as d3 from 'd3';
+
+    interface DataClass {
+        'Data Class': string;
+        'Threat Level': number;
+    }
+
+    let threatLevels: { [DataClass: string]: number } = {};
+
+    const calculateThreatLevel = (leak: { DataClasses: any[]; }) => {
+        let maxThreat = 0;
+        let totalThreat = 0;
+        const dataclasses = leak.DataClasses;
+
+        for (const dataClass of dataclasses) {
+            const threatLevel = threatLevels[dataClass];
+            maxThreat = Math.max(maxThreat, threatLevel);
+            totalThreat += threatLevel;
+        }
+
+        const weightedThreat = (maxThreat * 5 + totalThreat) / 2;
+        const dataClassCountWeight = dataclasses.length * 5;
+
+        let finalThreat = Math.max(weightedThreat + dataClassCountWeight, maxThreat * 5);
+
+        if (
+            (dataclasses.includes("Email addresses") || dataclasses.includes("Usernames")) &&
+            dataclasses.includes("Passwords")
+        ) {
+            finalThreat = Math.max(finalThreat, 80);
+        }
+
+        return Math.min(finalThreat, 100)/10;
+    };
+
+    onMount(async () => {
+        const response = await fetch('/src/lib/threatLevels.csv');
+        const csvData = await response.text();
+
+        const data: DataClass[] = d3.csvParse(csvData);
+        data.forEach(row => {
+            threatLevels[row['Data Class']] = +row['Threat Level'];
+        });
+
+        leaks = leaks.map((leak: {DataClasses: any[]; }) => {
+            const avgThreatLevel = calculateThreatLevel(leak);
+            // Add the average threat level to the leak object
+            return {
+                ...leak,
+                avgThreatLevel,
+            };
+        });
+    });
+
+    let data = [];
 
 
+    let selected = {...leaks[0], avgThreatLevel: 0}; // Initially setting avgThreatLevel to 0
 
-    let selected = leaks[0];
+    $: {
+    if (leaks.length > 0) {
+        selected = leaks[0]; // Updating selected whenever leaks changes
+    }
+    }
 
-    onMount(() => {
+
+    onMount(async () => {
         container.scrollIntoView({behavior: 'smooth'});
         checkScroll();
         container.addEventListener("scroll", checkScroll);
-    })
+
+
+    });
 
     function checkScroll() {
         // Check if the scroll position is less than the maximum scrollable height
@@ -67,31 +140,95 @@
         </div>
     </div>
   <main>
-    <h1>{selected.Name}</h1>
-    <p>Leaked on: {selected.BreachDate}</p>
-    <h3>Leaked Information</h3>
-    <ul>
-        {#each selected.DataClasses as category}
-            <li>
-                {category}
-            </li>
-        {/each}
-    </ul>   
-    <button class="downloadbutton" on:click={() => downloadData(leaks)} >Download Data</button>
+    <div class="titles">
+        <h1>{selected.Name}</h1>
+        <p>Leaked on: {selected.BreachDate}</p>
+    </div>
+    <div class="leakcategories">
+        <h3>Leaked Information</h3>
+        <ul>
+            {#each selected.DataClasses as category}
+                <li>
+                    {category}
+                </li>
+            {/each}
+        </ul>   
+    </div>  
+    <div class="riskFactor">
+        <h3>Risk Factor</h3>
+        <svg class="progress-ring" viewBox="0 0 120 120">
+            <circle class="progress-ring__circle" stroke="grey" stroke-width="4" fill="transparent" r="40%" cx="50%" cy="50%" />
+            <circle class="progress-ring__circle" stroke={threatColor} stroke-width="4" fill="transparent" r="40%" cx="50%" cy="50%"
+                stroke-dasharray="{selected.avgThreatLevel * 30}, 1000"
+            />
+            {#if selected.avgThreatLevel !== undefined && !isNaN(selected.avgThreatLevel)}
+                <text x="50%" y="50%" text-anchor="middle" dy=".3em" font-size="20px" fill="white">
+                    {selected.avgThreatLevel.toFixed(2)}
+                </text>
+            {/if}
+        </svg>
+    </div>
+    <div class="downloadbutton" ><button on:click={() => downloadData(leaks)}>Download Data</button></div>
   </main>
   
 
 <style>
 
+    
+
+    .titles{
+        width: 320px;
+        grid-column: 1 / span 1;
+        grid-row: 1 / span 1;
+
+    }
+    .leakcategories{
+        grid-column: 2 /span 1;
+        grid-row: 1 / span 2
+    }
+    .riskFactor {
+        grid-column: 1 / span 1;
+        grid-row: 2 / span 2;
+        display: flex;
+        flex-direction: column;
+    }
+    .riskFactor > h3{
+        width: 100%;
+        margin-left: 10%;
+    }
+
+    .progress-ring{
+        width: 75%;
+        max-height: 25rem;
+    }
+
     .downloadbutton{
-        padding: 0.5rem 1rem;
-        border-radius: 10px;
+        grid-column: 2 / span 1;
+        grid-row: 3 / span 1;
+        width: 100%;
+    }
+    .progress-ring__circle {
+        transition: 0.35s stroke-dasharray;
+        /* transform: rotate(-90deg); */
+        transform-origin: 50% 50%;
+    }
+
+    .downloadbutton{
+        width: 100%;
+        transition: all 1s ease;
+        display: flex;
+        justify-content: flex-start;
+    }
+
+    .downloadbutton > button {
+        height: min-content;
         background-color: var(--accent);
-        width: max-content;
+        padding: 1rem 1.5rem;
+        border-radius: 0.8rem;
         transition: all 1s ease;
     }
 
-    .downloadbutton:hover{
+    .downloadbutton > button:hover{
         cursor:pointer;
         transform: scale(1.1)
     }
@@ -147,13 +284,25 @@
         flex-direction: column;
     }
 
-    main{
+    main {
         padding: 0rem 1rem;
-        display: flex;
-        flex-direction: column;
+        display: grid;
+        grid-template-rows: repeat(3, 1fr);
+        grid-template-columns: 1fr 1fr;
         gap: 1rem;
-
+        max-width: max-content;
+        max-height: max-content;
+        justify-items: center;
+        max-width: max-content;
     }
+
+    @media screen and (max-width: 1028px) {
+        main {
+        grid-template-rows: repeat(4, 1fr);
+        grid-template-columns: 1fr;
+        }
+    }
+
     ul{
         /* margin-left: 1rem; */
         padding: 1rem;
@@ -164,23 +313,34 @@
         list-style-type:square
     }
 
-    h1{
-        text-decoration: underline;
+    li{
+        font-size: 1.2rem;
     }
 
+    h1{
+        text-decoration: underline;
+        font-size: 3rem;
+    }
+    h3{
+        font-size: 2rem;
+    }
+
+    p{
+        font-size: 1.5rem;
+    }
     aside{
         display: flex;
         flex-direction: column;
         gap: 2rem;
         align-items: center;
         margin-left: 2rem;
-        max-height: 28rem;
+        max-height: 32rem;
         overflow-y: scroll;
     }
 
     #scroll-indicator {
         position: absolute;
-        bottom: -50px; /* Adjust as needed */
+        bottom: -50px;
         /* right: 20%; */
         width:100%;
         display: none; /* Hidden by default */
