@@ -278,7 +278,9 @@ footer{
 }
 @media only screen and (min-width: 600px){
 
-
+    section{
+        margin-top: 10%;
+    }
     
     
     
@@ -304,7 +306,7 @@ footer{
         flex: 5;
         border-radius: 0.5rem;
         padding: 0.5rem 1rem;
-        font-size: 1rem;
+        font-size: 1.5rem;
         text-align: center;
         border: none;
     }
