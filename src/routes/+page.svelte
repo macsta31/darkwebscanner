@@ -273,8 +273,9 @@
     .scanresults{
         width: 100%;
         display: flex;
+        justify-content: center;
         padding-bottom: 10rem;
-        gap: 3rem;
+        gap: 5rem;
         height: min-content;
     }
 
