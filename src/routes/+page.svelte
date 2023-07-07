@@ -134,25 +134,154 @@
 
 
 <style>
-    #wrapper{
-        display: flex;
-        flex-direction: column;
-        flex: 1 auto;
-    }
-    section{
-        position: relative;
-        flex: 1;
-        display: flex;
-        justify-content: center;
-        margin-top: 15%;
-        
-    }
-    .formdiv{
-        display: flex;
-        flex-direction:column;
-        align-items: center;
-        gap: 1rem;
-    }
+#wrapper{
+    display: flex;
+    flex-direction: column;
+    flex: 1 auto;
+}
+
+section{
+    position: relative;
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    margin-top: 30%;
+    
+}
+
+.formdiv{
+    display: flex;
+    flex-direction:column;
+    align-items: center;
+    gap: 1rem;
+}
+h1{
+    font-size: 1.5rem;
+    text-align: center;
+}
+
+h3 {
+    font-size: 1rem;
+    text-align:center;
+}
+
+form{
+    width: 80%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+.formsection{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 1rem;
+}
+
+.formsection > input {
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    text-align: center;
+    border: none;
+    width: 100%;
+}
+.formsection > input:focus{
+    outline: none;
+    border: none;
+}
+
+
+.scanresults_error{
+    width: 400px;
+    background-color: red;
+}
+
+button{
+    position: relative;
+    background-color: var(--accent);
+    padding: 0.5rem 1.5rem;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: all 1s ease;
+    flex: 1;
+    box-shadow: inset 5px 5px 15px rgb(47, 63, 198), inset -5px -5px 15px rgb(47, 63, 198);
+    width: 50%;
+    align-self: center;
+
+}
+button:hover{
+    cursor: pointer;
+    transform:scale(1.02);
+}
+
+button:active{
+    transform: scale(0.98);
+    box-shadow: inset 5px 5px 10px rgb(36, 47, 150), inset -5px -5px 10px rgb(36, 47, 150);
+}
+
+.custom-shape-divider-top-1688128729{
+    position: absolute;
+    top:0;
+    left:0;
+    width: 100%;
+    overflow:hidden;
+    transform: rotate(0deg);
+    z-index: -999;
+}
+.custom-shape-divider-top-1688128729 svg {
+    pointer-events: none;
+    position: relative;
+    display: block;
+    height: 30rem;
+}
+
+.custom-shape-divider-top-1688128729 .shape-fill {
+    fill: var(--accent);
+}
+.custom-shape-divider-bottom-1688128729 {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    overflow: hidden;
+    line-height: 0;
+    transform: rotate(180deg);
+    z-index: -999;
+}
+
+.custom-shape-divider-bottom-1688128729 svg {
+    pointer-events: none;
+    position: relative;
+    display: block;
+    height: 25rem;
+}
+
+.custom-shape-divider-bottom-1688128729 .shape-fill {
+    fill: var(--accent);
+}
+
+#results{
+    margin-top: 0 ;
+    display: flex;
+    flex-direction: column;
+    
+}
+
+footer{
+    width: 100%;
+    display: grid;
+    place-content: center;
+    font-size: 0.3rem;
+    padding-bottom: 1rem;
+}
+@media only screen and (min-width: 600px){
+
+
+    
+    
+    
 
     h1{
         font-size: 3rem;
@@ -162,13 +291,7 @@
         font-size: 2rem;
         text-align: center;
     }
-    form{
-        width: 60%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 1rem;
-    }
+    
 
     .formsection{
         display: flex;
@@ -186,16 +309,7 @@
         border: none;
     }
 
-    .formsection > input:focus{
-        outline: none;
-        border: none;
-    }
-
-
-    .scanresults_error{
-        width: 400px;
-        background-color: red;
-    }
+    
     .custom-shape-divider-top-1688128729{
         position: absolute;
         top:0;
@@ -240,35 +354,12 @@
 
 
 
-    button{
-        position: relative;
-        background-color: var(--accent);
-        padding: 0.5rem 1.5rem;
-        border-radius: 10px;
-        font-size: 1rem;
-        transition: all 1s ease;
-        flex: 1;
-        box-shadow: inset 5px 5px 15px rgb(47, 63, 198), inset -5px -5px 15px rgb(47, 63, 198);
-
-    }
-
-    button:hover{
-        cursor: pointer;
-        transform:scale(1.02);
-    }
-
-    button:active{
-        transform: scale(0.98);
-        box-shadow: inset 5px 5px 10px rgb(36, 47, 150), inset -5px -5px 10px rgb(36, 47, 150);
-    }
     
 
-    #results{
-        margin-top: 0;
-        display: flex;
-        flex-direction: column;
-        
-    }
+    
+    
+
+    
 
     .scanresults{
         width: 100%;
@@ -279,17 +370,14 @@
         height: min-content;
     }
 
-    footer{
-        width: 100%;
-        display: grid;
-        place-content: center;
-        font-size: 0.3rem;
-        padding-bottom: 1rem;
-    }
+
 
     input{
         color: black;
     }
+}
+
+
 
 
 </style>

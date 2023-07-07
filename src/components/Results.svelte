@@ -125,8 +125,8 @@
                     aria-current={selected === breach}
                     >
                     <div class="item-header">
-                      <img class="logo" src={breach.LogoPath} alt="{breach.Name} logo" />
-                      <h2>{breach.Name} <br> {breach.BreachDate}</h2>
+                      <img style="display: none;" class="logo" src={breach.LogoPath} alt="{breach.Name} logo" />
+                      <h2>{breach.Name} <br> <p style="display: none;" class="breachdate">{breach.BreachDate}</p></h2>
                     </div>
                   </button>
                 {/each}
@@ -175,9 +175,125 @@
 
 <style>
 
-    
+    .scroll-container{
+        display: flex;
+    }
+
+    aside {
+        display: flex;
+        flex-wrap: nowrap
+    }
+
+    ul {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    img {
+        display: none;
+    }
+
+    aside > * > button{
+        border: 2px solid var(--accent);
+        width: 100%;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        transition: all 1s ease;
+        margin: 0.5rem;
+        
+    }
+
+    button:hover {
+        cursor: pointer;
+        background-color: var(--accent);
+        transform:scale(1.05)
+    }
+
+    .scrollicon:hover{
+        background-color: transparent;
+        transition: all 1s ease;
+        transform:scale(1.1);
+        cursor: pointer;
+    }
+
+    button:active{
+        transform: scale(0.8)
+    }
+    button[aria-current="true"]{
+        background-color: var(--accent);
+    }
+
+    main {
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .titles {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .leakcategories{
+        display: flex;
+        flex-direction: column;
+        padding-top: 1rem;
+    }
+
+    .leakcategories > ul {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        padding-left: 1rem;
+    }
+
+    .leakcategories > h3 {
+        font-size: 1.5rem;
+    }
+
+    .riskFactor{
+        display: flex;
+
+    }
+
+    .progress-ring{
+        width: 50%;
+        max-height: 25rem;
+    }
+
+    .downloadbutton{
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .downloadbutton > button {
+        height: min-content;
+        background-color: var(--accent);
+        padding: 1rem 1.5rem;
+        border-radius: 0.8rem;
+        transition: all 1s ease;
+    }
+
+    .downloadbutton > button:hover{
+        cursor:pointer;
+        transform: scale(1.1)
+    }
+
+    .downloadbutton:active{
+        transform: scale(0.9)
+    }
+
+
+@media only screen and (min-width: 600px){
+
+    .breachdate {
+        display: block !important
+    }
 
     .titles{
+        display: block;
         width: 320px;
         grid-column: 1 / span 1;
         grid-row: 1 / span 1;
@@ -219,26 +335,13 @@
         transition: all 1s ease;
         display: flex;
         justify-content: flex-start;
+        padding-left: 1rem;
     }
 
-    .downloadbutton > button {
-        height: min-content;
-        background-color: var(--accent);
-        padding: 1rem 1.5rem;
-        border-radius: 0.8rem;
-        transition: all 1s ease;
-    }
-
-    .downloadbutton > button:hover{
-        cursor:pointer;
-        transform: scale(1.1)
-    }
-
-    .downloadbutton:active{
-        transform: scale(0.9)
-    }
+    
 
     img{
+        display: block !important;
         object-fit: contain;
     }
     .timeline {
@@ -293,18 +396,25 @@
         gap: 1rem;
         max-width: max-content;
         max-height: max-content;
-        justify-items: center;
+        justify-items: flex-start;
         max-width: max-content;
     }
 
-    @media screen and (max-width: 1028px) {
-        main {
-        grid-template-rows: repeat(4, 1fr);
-        grid-template-columns: 1fr;
-        }
+    aside > * > button{
+        border: 2px solid var(--accent);
+        width: 100%;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        transition: all 1s ease;
+        margin: 0;
+        
     }
 
+
     ul{
+        padding-left: 0rem;
+        display: flex !important;
+        flex-wrap: nowrap;
         /* margin-left: 1rem; */
         padding: 1rem;
         display: flex;
@@ -350,35 +460,11 @@
         justify-content: center;
     }
 
-    aside > * > button{
-        border: 2px solid var(--accent);
-        width: 100%;
-        padding: 0.5rem 1rem;
-        border-radius: 0.5rem;
-        transition: all 1s ease;
+   
 
-        
-    }
+    
 
-    button:hover {
-        cursor: pointer;
-        background-color: var(--accent);
-        transform:scale(1.05)
-    }
-
-    .scrollicon:hover{
-        background-color: transparent;
-        transition: all 1s ease;
-        transform:scale(1.1);
-        cursor: pointer;
-    }
-
-    button:active{
-        transform: scale(0.8)
-    }
-    button[aria-current="true"]{
-        background-color: var(--accent);
-    }
+}
 
     
 </style>
