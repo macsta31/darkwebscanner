@@ -2,25 +2,32 @@
     import type { LayoutData } from './$types';
     import { dev } from '$app/environment';
     import { inject } from '@vercel/analytics';
+    import { navigating } from '$app/stores';
  
     inject({ mode: dev ? 'development' : 'production' });
     
     import '../global.css'
+  import Loader from '../components/Loader.svelte';
     
     // export let data: LayoutData;
 </script>
 
+
 <main>
-    <header>
-        <h1>ISAIX</h1>
-        <nav>
-            <a href="/blog">Blog</a>
-            <a href="/news">News</a>
-            <button>Contact Us</button>
-        </nav>
-    </header>
     
-    <slot />
+    {#if $navigating}
+     <Loader />
+    {:else}
+        <header>
+            <h1>ISAIX</h1>
+            <nav>
+                <a href="/blog">Blog</a>
+                <a href="/news">News</a>
+                <button>Contact Us</button>
+            </nav>
+        </header>
+        <slot />
+    {/if}
 
     
 </main>

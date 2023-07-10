@@ -6,16 +6,21 @@ export async function scan(searchParam: string) {
         .then(response => response.json())
         .then(data => {
             // Sort data based on BreachDate
-            data.sort((a: { BreachDate: string | number | Date; }, b: { BreachDate: string | number | Date; }) => {
-                const dateA = new Date(a.BreachDate);
-                const dateB = new Date(b.BreachDate);
+            if (data.length > 0) { 
+                data.sort((a: { BreachDate: string | number | Date; }, b: { BreachDate: string | number | Date; }) => {
+                    const dateA = new Date(a.BreachDate);
+                    const dateB = new Date(b.BreachDate);
 
-                // Compare dates: if a is more recent, it will come later in the array
-                return dateA.getTime() - dateB.getTime();
-            });
-            return data;
+                    // Compare dates: if a is more recent, it will come later in the array
+                    return dateA.getTime() - dateB.getTime();
+                });
+                return data;
+            }
+            else{
+                return []
+            }
         })
         .catch(error => {
-            console.error('Error:', error);
+            // console.error('Error:', error);
         });
 }

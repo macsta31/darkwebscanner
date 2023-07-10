@@ -3,6 +3,10 @@
      * @type {any}
      */
     export let leaks:any
+
+    let animate = false;
+  
+     $: animate = leaks.length === 0;
     /**
    * @type {HTMLElement}
    */
@@ -12,6 +16,7 @@
    */
     let scrollIndicator: HTMLDivElement;
     let html;
+    import { fly } from 'svelte/transition';
 
 
     let threatColor = "green";
@@ -27,6 +32,7 @@
     import { onMount, afterUpdate } from 'svelte';
     import downloadData from '../resultDownload';
     import * as d3 from 'd3';
+    import Emoji from './Emoji.svelte';
 
     interface DataClass {
         'Data Class': string;
@@ -62,22 +68,24 @@
     };
 
     onMount(async () => {
-        const response = await fetch('/threatLevels.csv');
-        const csvData = await response.text();
+        if (leaks.length > 0){
+            const response = await fetch('/threatLevels.csv');
+            const csvData = await response.text();
 
-        const data: DataClass[] = d3.csvParse(csvData);
-        data.forEach(row => {
-            threatLevels[row['Data Class']] = +row['Threat Level'];
-        });
+            const data: DataClass[] = d3.csvParse(csvData);
+            data.forEach(row => {
+                threatLevels[row['Data Class']] = +row['Threat Level'];
+            });
 
-        leaks = leaks.map((leak: {DataClasses: any[]; }) => {
-            const avgThreatLevel = calculateThreatLevel(leak);
-            // Add the average threat level to the leak object
-            return {
-                ...leak,
-                avgThreatLevel,
-            };
-        });
+            leaks = leaks.map((leak: {DataClasses: any[]; }) => {
+                const avgThreatLevel = calculateThreatLevel(leak);
+                // Add the average threat level to the leak object
+                return {
+                    ...leak,
+                    avgThreatLevel,
+                };
+            });
+        }
     });
 
     let data = [];
@@ -86,9 +94,9 @@
     let selected = {...leaks[0], avgThreatLevel: 0}; // Initially setting avgThreatLevel to 0
 
     $: {
-    if (leaks.length > 0) {
-        selected = leaks[0]; // Updating selected whenever leaks changes
-    }
+        if (leaks.length > 0) {
+            selected = leaks[0]; // Updating selected whenever leaks changes
+        }
     }
 
 
@@ -101,12 +109,15 @@
     });
 
     function checkScroll() {
-        // Check if the scroll position is less than the maximum scrollable height
-        if (container.scrollTop < container.scrollHeight - container.clientHeight) {
-            scrollIndicator.style.display = "flex"; // Show the scroll indicator
-        } else {
-            scrollIndicator.style.display = "none"; // Hide the scroll indicator
+        if(leaks.length > 0){
+            // Check if the scroll position is less than the maximum scrollable height
+            if (container.scrollTop < container.scrollHeight - container.clientHeight) {
+                scrollIndicator.style.display = "flex"; // Show the scroll indicator
+            } else {
+                scrollIndicator.style.display = "none"; // Hide the scroll indicator
+            }
         }
+        
     }
 
     function scrollDown() {
@@ -117,63 +128,81 @@
 
   
   </script>
-    <div class="scroll-container">
-        <aside bind:this={container}>
-            <ul class="timeline">
-                {#each leaks as breach (breach.Name)}
-                  <button class={selected === breach ? 'timeline-item active' : 'timeline-item'} on:click={() => selected = breach}
-                    aria-current={selected === breach}
-                    >
-                    <div class="item-header">
-                      <img style="display: none;" class="logo" src={breach.LogoPath} alt="{breach.Name} logo" />
-                      <h2>{breach.Name} <br> <p style="display: none;" class="breachdate">{breach.BreachDate}</p></h2>
-                    </div>
-                  </button>
-                {/each}
-              </ul>
+    <Emoji {animate} />
+    {#if leaks.length > 0}
+        <div class="scroll-container">
+            <aside bind:this={container}>
+                <ul class="timeline">
+                    {#each leaks as breach (breach.Name)}
+                    <button class={selected === breach ? 'timeline-item active' : 'timeline-item'} on:click={() => selected = breach}
+                        aria-current={selected === breach}
+                        >
+                        <div class="item-header">
+                        <img style="display: none;" class="logo" src={breach.LogoPath} alt="{breach.Name} logo" />
+                        <h2>{breach.Name} <br> <p style="display: none;" class="breachdate">{breach.BreachDate}</p></h2>
+                        </div>
+                    </button>
+                    {/each}
+                </ul>
+                
+            </aside>
             
-        </aside>
-        
-        <div id="scroll-indicator" bind:this={scrollIndicator} >
-            <button class="scrollicon" on:click={scrollDown}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g transform="rotate(180 12 12)"><g fill="none"><path d="M24 0v24H0V0h24ZM12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035c-.01-.004-.019-.001-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427c-.002-.01-.009-.017-.017-.018Zm.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093c.012.004.023 0 .029-.008l.004-.014l-.034-.614c-.003-.012-.01-.02-.02-.022Zm-.715.002a.023.023 0 0 0-.027.006l-.006.014l-.034.614c0 .012.007.02.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01l-.184-.092Z"/><path fill="currentColor" d="M13.06 3.283a1.5 1.5 0 0 0-2.12 0L5.281 8.939a1.5 1.5 0 0 0 2.122 2.122L10.5 7.965V19.5a1.5 1.5 0 0 0 3 0V7.965l3.096 3.096a1.5 1.5 0 1 0 2.122-2.122L13.06 3.283Z"/></g></g></svg>
-        </button>
+            <div id="scroll-indicator" bind:this={scrollIndicator} >
+                <button class="scrollicon" on:click={scrollDown}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g transform="rotate(180 12 12)"><g fill="none"><path d="M24 0v24H0V0h24ZM12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035c-.01-.004-.019-.001-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427c-.002-.01-.009-.017-.017-.018Zm.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093c.012.004.023 0 .029-.008l.004-.014l-.034-.614c-.003-.012-.01-.02-.02-.022Zm-.715.002a.023.023 0 0 0-.027.006l-.006.014l-.034.614c0 .012.007.02.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01l-.184-.092Z"/><path fill="currentColor" d="M13.06 3.283a1.5 1.5 0 0 0-2.12 0L5.281 8.939a1.5 1.5 0 0 0 2.122 2.122L10.5 7.965V19.5a1.5 1.5 0 0 0 3 0V7.965l3.096 3.096a1.5 1.5 0 1 0 2.122-2.122L13.06 3.283Z"/></g></g></svg>
+            </button>
+            </div>
         </div>
-    </div>
-  <main>
-    <div class="titles">
-        <h1>{selected.Name}</h1>
-        <p>Leaked on: {selected.BreachDate}</p>
-    </div>
-    <div class="leakcategories">
-        <h3>Leaked Information</h3>
-        <ul>
-            {#each selected.DataClasses as category}
-                <li>
-                    {category}
-                </li>
-            {/each}
-        </ul>   
-    </div>  
-    <div class="riskFactor">
-        <h3>Risk Factor</h3>
-        <svg class="progress-ring" viewBox="0 0 120 120">
-            <circle class="progress-ring__circle" stroke="grey" stroke-width="4" fill="transparent" r="40%" cx="50%" cy="50%" />
-            <circle class="progress-ring__circle" stroke={threatColor} stroke-width="4" fill="transparent" r="40%" cx="50%" cy="50%"
-                stroke-dasharray="{selected.avgThreatLevel * 30}, 1000"
-            />
-            {#if selected.avgThreatLevel !== undefined && !isNaN(selected.avgThreatLevel)}
-                <text x="50%" y="50%" text-anchor="middle" dy=".3em" font-size="20px" fill="white">
-                    {selected.avgThreatLevel.toFixed(2)}
-                </text>
-            {/if}
-        </svg>
-    </div>
-    <div class="downloadbutton" ><button on:click={() => downloadData(leaks)}>Download Data</button></div>
-  </main>
+    
+        <main>
+            <div class="titles">
+                <h1>{selected.Name}</h1>
+                <p>Leaked on: {selected.BreachDate}</p>
+            </div>
+            <div class="leakcategories">
+                <h3>Leaked Information</h3>
+                <ul>
+                    {#each selected.DataClasses as category}
+                        <li>
+                            {category}
+                        </li>
+                    {/each}
+                </ul>   
+            </div>  
+            <div class="riskFactor">
+                <h3>Risk Factor</h3>
+                <svg class="progress-ring" viewBox="0 0 120 120">
+                    <circle class="progress-ring__circle" stroke="grey" stroke-width="4" fill="transparent" r="40%" cx="50%" cy="50%" />
+                    <circle class="progress-ring__circle" stroke={threatColor} stroke-width="4" fill="transparent" r="40%" cx="50%" cy="50%"
+                        stroke-dasharray="{selected.avgThreatLevel * 30}, 1000"
+                    />
+                    {#if selected.avgThreatLevel !== undefined && !isNaN(selected.avgThreatLevel)}
+                        <text x="50%" y="50%" text-anchor="middle" dy=".3em" font-size="20px" fill="white">
+                            {selected.avgThreatLevel.toFixed(2)}
+                        </text>
+                    {/if}
+                </svg>
+            </div>
+            <div class="downloadbutton" ><button on:click={() => downloadData(leaks)}>Download Data</button></div>
+        </main>
+    {:else}
+        
+        <section id="noResultsSection" bind:this={container} >
+            <p>Good news! We found no evidence of your email address in any data leaks. Continue practicing safe online habits to keep your information secure.</p>
+        </section>
+    {/if}
   
 
 <style>
+    p{
+        text-align: center;
+    }
+    #noResultsSection{
+        width: 50%;
+        height: 50vh;
+        display:grid;
+        place-content: center;
+    }
 
     .scroll-container{
         display: flex;
