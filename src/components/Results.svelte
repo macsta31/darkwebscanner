@@ -198,10 +198,16 @@
         text-align: center;
     }
     #noResultsSection{
-        width: 50%;
-        height: 50vh;
-        display:grid;
-        place-content: center;
+        width: 100%;
+        /* height: 50vh; */
+        padding-bottom: 5rem;
+        display:flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    #noResultsSection > p {
+        padding: 1rem;
     }
 
     .scroll-container{
@@ -319,6 +325,10 @@
 
     .breachdate {
         display: block !important
+    }
+
+    #noResultsSection{
+        width: 50%;
     }
 
     .titles{

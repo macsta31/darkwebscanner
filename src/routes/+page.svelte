@@ -79,7 +79,7 @@
                 {#if !searching}
                 <form on:submit|preventDefault={handleSubmit} >
                     <div class="formsection">
-                        <input name="searchParam" type="text" bind:value={searchParam}>
+                        <input name="searchParam" type="text" bind:value={searchParam} required>
                         <button type="submit">
                                 Search
                         </button>
