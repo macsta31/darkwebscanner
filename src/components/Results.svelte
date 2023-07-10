@@ -320,8 +320,35 @@
         transform: scale(0.9)
     }
 
+/* @media only screen and (min-width: 600px){
+    main{
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        justify-content: center;
+    }
+    main > *{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
 
-@media only screen and (min-width: 600px){
+    main > * > p{
+        text-align: left;
+    }
+
+    .downloadbutton{
+        padding: 0;
+        align-items: flex-start;
+    }
+
+    aside{
+        max-height: 100%;
+    }
+} */
+
+
+@media only screen and (min-width: 1000px){
 
     .breachdate {
         display: block !important
@@ -504,6 +531,8 @@
     
 
 }
+
+
 
     
 </style>

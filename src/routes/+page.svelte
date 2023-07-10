@@ -84,10 +84,11 @@
                                 Search
                         </button>
                     </div>
-                        <label for="email" class="emailcheck">
-                            Receive results by email?
-                            <input class="checkbox" type="checkbox" bind:checked={emailNotification} />
-                        </label>
+                    <label class="checkbox-container">
+                        Receive Results By Email?
+                        <input type="checkbox" bind:checked={emailNotification} />
+                        <span class="custom-checkbox"></span>
+                    </label>
                 </form>
                 {:else}
                     <Loader />
@@ -137,6 +138,60 @@
 
 
 <style>
+.checkbox-container {
+    position: relative;
+    display: inline-block;
+}
+
+.checkbox-container:hover{
+    cursor:pointer;
+}
+
+.checkbox-container input {
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.custom-checkbox {
+    position: absolute;
+    top: 0;
+    height: 20px;
+    width: 20px;
+    background-color: #eee;
+    border: 1px solid #ddd;
+    box-sizing: border-box;
+}
+
+.checkbox-container input:checked ~ .custom-checkbox {
+    background-color: var(--accent);
+}
+
+.custom-checkbox:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+.checkbox-container input:checked ~ .custom-checkbox:after {
+    display: block;
+}
+
+.checkbox-container .custom-checkbox:after {
+    left: 7px;
+    top: 3px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+label{
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
 #pageloader{
     width: 100%;
     height:100vh;
