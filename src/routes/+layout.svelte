@@ -1,15 +1,34 @@
 <script lang="ts">
-    import type { LayoutData } from './$types';
+    import { onMount } from 'svelte';
+    import { supabase } from '$lib/supabaseClient';
     import { dev } from '$app/environment';
     import { inject } from '@vercel/analytics';
     import { navigating } from '$app/stores';
+    import { user } from '$lib/authStore';
  
     inject({ mode: dev ? 'development' : 'production' });
     
     import '../global.css'
-  import Loader from '../components/Loader.svelte';
-    
-    // export let data: LayoutData;
+    import Loader from '../components/Loader.svelte';
+
+    const handleLogin = async () => {
+        const res = await supabase.auth.signInWithPassword({
+            email: 'mackstathis@gmail.com',
+            password: 'admin123'
+        })
+        // console.log(res)
+    }
+
+    const handleLogout = async () => {
+        const res = await supabase.auth.signOut();
+    }
+    let dashboardSwitch: string | undefined
+    $: if($user){
+        dashboardSwitch = $user.user.email
+    }
+    else{
+        dashboardSwitch = "login"
+    }
 </script>
 
 
@@ -21,10 +40,16 @@
         <header>
             <h1>ISAIX</h1>
             <nav>
-                <a href="/blog">Blog</a>
+                <a href="/">Home</a>
+                <a href="/{dashboardSwitch}">Dashboard</a>
                 <a href="/news">News</a>
                 <button>Contact Us</button>
             </nav>
+            {#if $user}
+                <button on:click={() => handleLogout()} >Log Out</button>
+            {:else}
+                <button on:click={() => handleLogin()}>Log In</button>
+            {/if}
         </header>
         <slot />
     {/if}

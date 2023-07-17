@@ -1,8 +1,6 @@
-import { env } from '$env/dynamic/private';
-// import Hello from '$lib/emails/EmailResults.svelte';
-import nodemailer from 'nodemailer';
 import { json } from '@sveltejs/kit';
 import { VITE_APIKEY, VITE_DOMAIN } from '$env/static/private';
+import { supabase } from '$lib/supabaseClient.js';
 
 const API_KEY = VITE_APIKEY;
 const DOMAIN = VITE_DOMAIN;
@@ -46,8 +44,67 @@ async function sendMail(searchParam: any, scanResult: { Name: any; Title: any; D
     });
 }
 
+async function addDataClassesToDB(DataClasses:string[]){
+  DataClasses.forEach(async (dataClass: string) => {
+    const { data, error } = await supabase
+    .from('DataClasses')
+    .upsert([
+      {Name: dataClass},
+    ],
+    {
+      onConflict: 'Name'
+    })
+    // console.log(data, error)
+    return {data, error}
+  });
+}
+
+async function addBreachToDB(scanResult: { Name: any; Title: any; Domain: any; BreachDate: any; AddedDate: any; ModifiedDate: any; PwnCount: any; Description: any; DataClasses: any[]; LogoPath: any; IsVerified: any; IsFabricated: any; IsSensitive: any; IsSpamList: any; IsMalware: any; }[]){
+  try{
+
+
+    scanResult.forEach(async (result: { Name: any; Title: any; Domain: any; BreachDate: any; AddedDate: any; ModifiedDate: any; PwnCount: any; Description: any; DataClasses: any[]; LogoPath: any; IsVerified: any; IsFabricated: any; IsSensitive: any; IsSpamList: any; IsMalware: any; }) => {
+      await addDataClassesToDB(result.DataClasses)
+      await supabase
+      .from('Breach')
+      .upsert([
+        {
+          Name: result.Name,
+          Title: result.Title,
+          Domain: result.Domain,
+          BreachDate: result.BreachDate,
+          AddedDate: result.AddedDate,
+          ModifiedDate: result.ModifiedDate,
+          PwnCount: result.PwnCount,
+          Description: result.Description,
+          LogoPath: result.LogoPath,
+          IsVerified: result.IsVerified,
+          IsFabricated: result.IsFabricated,
+          IsSensitive: result.IsSensitive,
+          IsSpamList: result.IsSpamList,
+          IsMalware: result.IsMalware,
+        },
+      ],
+      {
+        onConflict: 'Name'
+      })
+    });
+    return {'message': 'Success'}
+  }
+  catch (error) {
+    return {'error': error}
+  }
+
+}
+
+
+
 export async function POST({ request }) {
   const { searchParam, scanResult } = await request.json();
-  const res = await sendMail(searchParam, scanResult);
-  return json(res)
+  // const res = await sendMail(searchParam, scanResult);
+  const retval = await addBreachToDB(scanResult)
+  console.log(retval)
+  // return json(res)
+  return json({retval})
+
 }
