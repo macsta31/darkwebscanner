@@ -16,7 +16,7 @@ async function sendMail(searchParam: any, scanResult: { Name: any; Title: any; D
   const client = mailgun.client({username: 'api', key: API_KEY});
 
   const messageData = {
-    from: 'Excited User <me@samples.mailgun.org>',
+    from: 'ISAIX Dark Web Scanner <darkwebscanner@isaix.com>',
     to: searchParam,
     subject: `Dark Web Scan Results For ${searchParam}`,
     text: scanResult.map((result: { Name: any; Title: any; Domain: any; BreachDate: any; PwnCount: any; Description: any; DataClasses: any[]; IsVerified: any; }) => {
