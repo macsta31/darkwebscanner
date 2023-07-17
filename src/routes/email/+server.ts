@@ -9,7 +9,14 @@ const DOMAIN = VITE_DOMAIN;
 
 import formData from 'form-data';
 import Mailgun from 'mailgun.js';
-
+function getMessageContent(scanResult: { Name: any; Title: any; Domain: any; BreachDate: any; PwnCount: any; Description: any; DataClasses: any[]; IsVerified: any; }[]){
+  if(scanResult[0]?.Name){
+    return scanResult.map((result: { Name: any; Title: any; Domain: any; BreachDate: any; PwnCount: any; Description: any; DataClasses: any[]; IsVerified: any; }) => {
+      return `Name: ${result.Name}\nTitle: ${result.Title}\nDomain: ${result.Domain}\nBreach Date: ${result.BreachDate}\nPwn Count: ${result.PwnCount}\nDescription: ${result.Description}\nData Classes: ${result.DataClasses.join(', ')}\nIs Verified: ${result.IsVerified}\n\n`
+    }).join('\n')
+  }
+  return "Good news! We found no evidence of your email address in any data leaks. Continue practicing safe online habits to keep your information secure."
+}
 
 async function sendMail(searchParam: any, scanResult: { Name: any; Title: any; Domain: any; BreachDate: any; PwnCount: any; Description: any; DataClasses: any[]; IsVerified: any; }[]) {
   const mailgun = new Mailgun(formData);
@@ -19,9 +26,7 @@ async function sendMail(searchParam: any, scanResult: { Name: any; Title: any; D
     from: 'ISAIX Dark Web Scanner <darkwebscanner@isaix.com>',
     to: searchParam,
     subject: `Dark Web Scan Results For ${searchParam}`,
-    text: scanResult.map((result: { Name: any; Title: any; Domain: any; BreachDate: any; PwnCount: any; Description: any; DataClasses: any[]; IsVerified: any; }) => {
-      return `Name: ${result.Name}\nTitle: ${result.Title}\nDomain: ${result.Domain}\nBreach Date: ${result.BreachDate}\nPwn Count: ${result.PwnCount}\nDescription: ${result.Description}\nData Classes: ${result.DataClasses.join(', ')}\nIs Verified: ${result.IsVerified}\n\n`
-    }).join('\n')
+    text: getMessageContent(scanResult)
   };
 
   return client.messages.create(DOMAIN, messageData)

@@ -71,7 +71,7 @@
         if (leaks.length > 0){
             const response = await fetch('/threatLevels.csv');
             const csvData = await response.text();
-
+            // @ts-ignore
             const data: DataClass[] = d3.csvParse(csvData);
             data.forEach(row => {
                 threatLevels[row['Data Class']] = +row['Threat Level'];
