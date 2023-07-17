@@ -1,21 +1,27 @@
 import { writable } from 'svelte/store';
+import type { Writable } from 'svelte/store'
+import type { Session } from '@supabase/supabase-js';
 import { supabase } from './supabaseClient';
 
-// Create the store and initialize it with the current user.
-async function getSession(){
-    const session = (await supabase.auth.getSession())?.data?.session
-    if(session){
-        return session
+async function getSession(): Promise<Session | null> {
+    const session = (await supabase.auth.getSession())?.data?.session;
+    if (session) {
+        return session;
     }
-    return null
+    return null;
 }
 
-export const user = writable(await getSession());
+// initialize the store with null
+export const user: Writable<Session | null> = writable(null);
+
+// then update it once the session data is loaded
+getSession().then(session => {
+    user.set(session);
+});
 
 supabase.auth.onAuthStateChange((event, session) => {
     if (event === 'SIGNED_OUT') {
         user.set(null);
-        
     } else if (session) {
         user.set(session);
     }
