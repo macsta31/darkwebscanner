@@ -54,8 +54,8 @@ async function addDataClassesToDB(DataClasses:string[]){
     {
       onConflict: 'Name'
     })
-    console.log(data, error)
-    return {data, error}
+    // console.log(data, error)
+    // return {data, error}
   });
 }
 
@@ -88,7 +88,7 @@ async function addBreachToDB(scanResult: { Name: any; Title: any; Domain: any; B
       {
         onConflict: 'Name'
       })
-      console.log(data, error)
+      return { 'data': data, 'error': error }
     });
     return {'message': 'Success'}
   }
