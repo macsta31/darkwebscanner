@@ -45,26 +45,35 @@ async function sendMail(searchParam: any, scanResult: { Name: any; Title: any; D
 }
 
 async function addDataClassesToDB(DataClasses:string[]){
-  DataClasses.forEach(async (dataClass: string) => {
-    const { data, error } = await supabase
-    .from('DataClasses')
-    .upsert([
-      {Name: dataClass},
-    ],
-    {
-      onConflict: 'Name'
-    })
-    // console.log(data, error)
-    return {data, error}
-  });
+  try {
+    DataClasses.forEach(async (dataClass: string) => {
+      const { data, error } = await supabase
+      .from('DataClasses')
+      .upsert([
+        {Name: dataClass},
+      ],
+      {
+        onConflict: 'Name'
+      });
+      
+      if (error) {
+        console.error('Error in addDataClassesToDB:', error.message);
+      } else {
+        console.log('addDataClassesToDB data:', data);
+      }
+
+      return {data, error};
+    });
+  } catch (error) {
+    console.error('Error in addDataClassesToDB:', error);
+  }
 }
 
 async function addBreachToDB(scanResult: { Name: any; Title: any; Domain: any; BreachDate: any; AddedDate: any; ModifiedDate: any; PwnCount: any; Description: any; DataClasses: any[]; LogoPath: any; IsVerified: any; IsFabricated: any; IsSensitive: any; IsSpamList: any; IsMalware: any; }[]){
   try{
-
-
-    scanResult.forEach(async (result: { Name: any; Title: any; Domain: any; BreachDate: any; AddedDate: any; ModifiedDate: any; PwnCount: any; Description: any; DataClasses: any[]; LogoPath: any; IsVerified: any; IsFabricated: any; IsSensitive: any; IsSpamList: any; IsMalware: any; }) => {
-      await addDataClassesToDB(result.DataClasses)
+    for (const result of scanResult) {
+      await addDataClassesToDB(result.DataClasses);
+      
       const { data, error } = await supabase
       .from('Breach')
       .upsert([
@@ -87,16 +96,23 @@ async function addBreachToDB(scanResult: { Name: any; Title: any; Domain: any; B
       ],
       {
         onConflict: 'Name'
-      })
-      console.log(data, error)
-    });
-    return {'message': 'Success'}
+      });
+
+      if (error) {
+        console.error('Error in addBreachToDB:', error.message);
+      } else {
+        console.log('addBreachToDB data:', data);
+      }
+    }
+
+    return {'message': 'Success'};
   }
   catch (error) {
-    return {'error': error}
+    console.error('Error in addBreachToDB:', error);
+    return {'error': error};
   }
-
 }
+
 
 
 
