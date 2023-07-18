@@ -55,7 +55,7 @@ async function addDataClassesToDB(DataClasses:string[]){
       onConflict: 'Name'
     })
     // console.log(data, error)
-    // return {data, error}
+    return {data, error}
   });
 }
 
@@ -88,7 +88,7 @@ async function addBreachToDB(scanResult: { Name: any; Title: any; Domain: any; B
       {
         onConflict: 'Name'
       })
-      return { 'data': data, 'error': error }
+      console.log(data, error)
     });
     return {'message': 'Success'}
   }
@@ -102,10 +102,8 @@ async function addBreachToDB(scanResult: { Name: any; Title: any; Domain: any; B
 
 export async function POST({ request }) {
   const { searchParam, scanResult } = await request.json();
-  // const res = await sendMail(searchParam, scanResult);
+  const res = await sendMail(searchParam, scanResult);
   const retval = await addBreachToDB(scanResult)
-  console.log(retval)
-  // return json(res)
   return json({retval})
 
 }
