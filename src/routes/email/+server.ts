@@ -65,7 +65,7 @@ async function addBreachToDB(scanResult: { Name: any; Title: any; Domain: any; B
 
     scanResult.forEach(async (result: { Name: any; Title: any; Domain: any; BreachDate: any; AddedDate: any; ModifiedDate: any; PwnCount: any; Description: any; DataClasses: any[]; LogoPath: any; IsVerified: any; IsFabricated: any; IsSensitive: any; IsSpamList: any; IsMalware: any; }) => {
       await addDataClassesToDB(result.DataClasses)
-      await supabase
+      const { data, error } = await supabase
       .from('Breach')
       .upsert([
         {
@@ -88,6 +88,7 @@ async function addBreachToDB(scanResult: { Name: any; Title: any; Domain: any; B
       {
         onConflict: 'Name'
       })
+      
     });
     return {'message': 'Success'}
   }
