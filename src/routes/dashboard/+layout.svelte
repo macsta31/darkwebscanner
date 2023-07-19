@@ -71,7 +71,7 @@
         width: 100%;
         display: flex;
         flex-direction: column;
-        padding: 3rem;
+        padding: 1rem;
     }
 
     header{
@@ -83,5 +83,11 @@
 
     p{
         color: rgb(170, 170, 170);
+    }
+
+    @media screen only and (max-width: 800px){
+        main{
+            padding: 1.5rem;
+        }
     }
 </style>
