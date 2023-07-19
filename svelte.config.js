@@ -20,6 +20,13 @@ const config = {
 		reportOnly: {
 			'script-src': ['self']
 		}
+	},
+	supabase: {
+		client: {
+			auth: {
+				persistSession: true //or true
+			}
+		}
 	}
 };
 

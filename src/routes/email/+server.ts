@@ -1,6 +1,5 @@
 import { json } from '@sveltejs/kit';
 import { VITE_APIKEY, VITE_DOMAIN } from '$env/static/private';
-import { supabase } from '$lib/supabaseClient.js';
 
 const API_KEY = VITE_APIKEY;
 const DOMAIN = VITE_DOMAIN;
@@ -21,7 +20,7 @@ async function sendMail(searchParam: any, scanResult: { Name: any; Title: any; D
   const client = mailgun.client({username: 'api', key: API_KEY});
 
   const messageData = {
-    from: 'ISAIX Dark Web Scanner <darkwebscanner@isaix.com>',
+    from: 'ISAIX Dark Web Scanner <donotreply@dw.isaix.com>',
     to: searchParam,
     subject: `Dark Web Scan Results For ${searchParam}`,
     text: getMessageContent(scanResult)
@@ -44,82 +43,10 @@ async function sendMail(searchParam: any, scanResult: { Name: any; Title: any; D
     });
 }
 
-async function addDataClassesToDB(DataClasses:string[]){
-  try {
-    DataClasses.forEach(async (dataClass: string) => {
-      const { data, error } = await supabase
-      .from('DataClasses')
-      .upsert([
-        {Name: dataClass},
-      ],
-      {
-        onConflict: 'Name'
-      });
-      
-      if (error) {
-        console.error('Error in addDataClassesToDB:', error.message);
-      } else {
-        console.log('addDataClassesToDB data:', data);
-      }
-
-      return {data, error};
-    });
-  } catch (error) {
-    console.error('Error in addDataClassesToDB:', error);
-  }
-}
-
-async function addBreachToDB(scanResult: { Name: any; Title: any; Domain: any; BreachDate: any; AddedDate: any; ModifiedDate: any; PwnCount: any; Description: any; DataClasses: any[]; LogoPath: any; IsVerified: any; IsFabricated: any; IsSensitive: any; IsSpamList: any; IsMalware: any; }[]){
-  try{
-    for (const result of scanResult) {
-      await addDataClassesToDB(result.DataClasses);
-      
-      const { data, error } = await supabase
-      .from('Breach')
-      .upsert([
-        {
-          Name: result.Name,
-          Title: result.Title,
-          Domain: result.Domain,
-          BreachDate: result.BreachDate,
-          AddedDate: result.AddedDate,
-          ModifiedDate: result.ModifiedDate,
-          PwnCount: result.PwnCount,
-          Description: result.Description,
-          LogoPath: result.LogoPath,
-          IsVerified: result.IsVerified,
-          IsFabricated: result.IsFabricated,
-          IsSensitive: result.IsSensitive,
-          IsSpamList: result.IsSpamList,
-          IsMalware: result.IsMalware,
-        },
-      ],
-      {
-        onConflict: 'Name'
-      });
-
-      if (error) {
-        console.error('Error in addBreachToDB:', error.message);
-      } else {
-        console.log('addBreachToDB data:', data);
-      }
-    }
-
-    return {'message': 'Success'};
-  }
-  catch (error) {
-    console.error('Error in addBreachToDB:', error);
-    return {'error': error};
-  }
-}
-
-
-
 
 export async function POST({ request }) {
   const { searchParam, scanResult } = await request.json();
   const res = await sendMail(searchParam, scanResult);
-  const retval = await addBreachToDB(scanResult)
-  return json({retval})
+  return json({res})
 
 }

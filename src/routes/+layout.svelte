@@ -1,34 +1,46 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
+    import { onMount, onDestroy } from 'svelte';
     import { supabase } from '$lib/supabaseClient';
     import { dev } from '$app/environment';
     import { inject } from '@vercel/analytics';
     import { navigating } from '$app/stores';
     import { user } from '$lib/authStore';
+    import { page } from '$app/stores';
  
     inject({ mode: dev ? 'development' : 'production' });
     
     import '../global.css'
     import Loader from '../components/Loader.svelte';
+  import { goto } from '$app/navigation';
 
     const handleLogin = async () => {
-        const res = await supabase.auth.signInWithPassword({
-            email: 'mackstathis@gmail.com',
-            password: 'admin123'
-        })
-        // console.log(res)
+        // const res = await supabase.auth.signInWithPassword({
+        //     email: 'mackstathis@gmail.com',
+        //     password: 'admin123'
+        // })
+        // // console.log(res)
+        if($page.route.id !== '/login'){
+            goto('/login')
+        }
+        
     }
 
     const handleLogout = async () => {
         const res = await supabase.auth.signOut();
+        if($page.route.id !== '/'){
+            goto('/')
+        }
+        
     }
+
     let dashboardSwitch: string | undefined
     $: if($user){
-        dashboardSwitch = $user.user.email
+        dashboardSwitch = "dashboard"
     }
     else{
         dashboardSwitch = "login"
     }
+
 </script>
 
 
@@ -39,17 +51,21 @@
     {:else}
         <header>
             <h1>ISAIX</h1>
-            <nav>
-                <a href="/">Home</a>
-                <a href="/{dashboardSwitch}">Dashboard</a>
-                <a href="/news">News</a>
+            <div>
+                <nav>
+                    <a href="/" class={$page.route.id === '/' ? 'active' : ''}>Home</a>
+                    <a href="/{dashboardSwitch}" class={$page.route.id === '/dashboard' ? 'active' : ''}>Dashboard</a>
+                    <a href="/news" class={$page.route.id === '/news' ? 'active' : ''}>News</a>
+                    
+                </nav>
+            
                 <button>Contact Us</button>
-            </nav>
-            {#if $user}
-                <button on:click={() => handleLogout()} >Log Out</button>
-            {:else}
-                <button on:click={() => handleLogin()}>Log In</button>
-            {/if}
+                {#if $user}
+                    <button on:click={() => handleLogout()} >Log Out</button>
+                {:else}
+                    <button on:click={() => handleLogin()}>Log In</button>
+                {/if}
+            </div>
         </header>
         <slot />
     {/if}
@@ -59,14 +75,37 @@
 
 <style>
 
+    div{
+        display: flex;
+        gap:1rem;
+    }
+
 nav{
     display: flex;
-    align-items: center;
+    /* justify-self: center; */
+    align-self: center;
     gap: 1rem;
     font-size: 1.2rem;
 }
-a{
+a {
+    position: relative;
     text-decoration: none;
+    overflow: hidden;
+}
+
+a::after {
+    content: "";
+    position: absolute;
+    width: 0%;
+    height: 2px;
+    bottom: 0;
+    left: 0;
+    background-color: currentColor;
+    transition: width 0.3s ease-in-out;
+}
+
+a.active::after {
+    width: 100%;
 }
 
 button{
@@ -92,7 +131,6 @@ header {
     background-color: var(--background);
     display: flex;
     align-items: center;
-    justify-content: space-between;
     padding: 0.5rem 1rem;
 }
 @media only screen and (min-width: 600px){

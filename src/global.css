@@ -25,6 +25,10 @@ button{
     border:none;
 }
 
+button:hover{
+    cursor: pointer
+}
+
 body{
     background-color: var(--background);
 }
