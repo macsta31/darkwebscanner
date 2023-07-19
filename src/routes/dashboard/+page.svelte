@@ -7,7 +7,10 @@
     import BarChart from '../../components/BarChart.svelte';
 
     export let data;
-    let breachData: any[] | null
+    let breachData: any[] | null;
+    let currentPage = 0;
+    const itemsPerPage = 10; // change this to the number of items you want per page
+    let maxPages = 0;
 
     onMount(() => {
         const breachOutput = supabase
@@ -19,19 +22,36 @@
             `)
             .eq('user_identifier', $user?.user.id)
             .then((res) => {
-                breachData = res.data
+                breachData = res.data;
+                maxPages = Math.ceil(breachData.length / itemsPerPage);
             })
     })
-    
 
-    
+    function goToPage(page: number) {
+        currentPage = page;
+    }
+
 </script>
 
 
     {#if breachData}
         {#if breachData[0]}
         <main>
+            
             <div class="tablecontainer">
+                {#if maxPages > 1}
+                    <div class="pagination">
+                        Page:
+                        {#each Array(maxPages) as _, i}
+                            <button 
+                                class="{currentPage === i ? 'active' : ''}" 
+                                on:click={() => goToPage(i)}
+                            >
+                                {i + 1}
+                            </button>
+                        {/each}
+                    </div>
+                {/if}
                 <table>
                     <thead>
                         <tr>
@@ -44,7 +64,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {#each breachData as item (item.breach_identifier)}
+                        {#each breachData.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage) as item (item.breach_identifier)}
                             <tr>
                                 <td>{item.breach_identifier}</td>
                                 <td><a href="https://{item.Breach.Domain}">{item.Breach.Domain}</a></td>
@@ -79,6 +99,25 @@
     {/if}
 
 <style>
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin: 1rem 0;
+        align-items: center        
+
+    }
+
+    .pagination > button{
+        font-size: 1rem;
+        padding: 0.5rem 1rem;
+        border-radius: 1rem;
+    }
+
+    .pagination > .active{
+        background-color: var(--accent)
+    }
 
     .tablecontainer {
         overflow-x: auto;

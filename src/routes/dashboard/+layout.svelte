@@ -53,6 +53,8 @@
 
 <style>
 
+
+
     button{
         background-color: var(--accent);
         padding: 0.5rem 1.5rem;
@@ -71,7 +73,7 @@
         width: 100%;
         display: flex;
         flex-direction: column;
-        padding: 1rem;
+        padding: 1.5rem;
     }
 
     header{
@@ -85,9 +87,13 @@
         color: rgb(170, 170, 170);
     }
 
-    @media screen only and (max-width: 800px){
+    @media only screen and (min-width: 800px){
         main{
-            padding: 1.5rem;
+            padding: 3rem;
         }
     }
+
+
+
+    
 </style>
