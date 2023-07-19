@@ -31,7 +31,7 @@
     {#if breachData}
         {#if breachData[0]}
         <main>
-            <div class="tablecontainer"></div>
+            <div class="tablecontainer">
                 <table>
                     <thead>
                         <tr>
@@ -56,12 +56,14 @@
                         {/each}
                     </tbody>
                 </table>
+            </div>
                 <div class="otherinfo">
                     <BarChart chartData={breachData}/>
                 </div>
                 <div class="chart">
                     <Chart chartData={breachData}/>
                 </div>
+            
             </main>
             {:else}
                 <div class="nodata">
@@ -77,12 +79,16 @@
     {/if}
 
 <style>
+
+    .tablecontainer {
+        overflow-x: auto;
+        grid-row: 1 / span 2; 
+        grid-column: 1 / span 2; 
+    }
     main{
-        display: grid;
-        grid-template-rows: 2fr 2fr;
-        grid-template-columns: 1fr 1fr;
-        gap: 2rem;
-        max-width: 100%;
+        
+        display: flex;
+        flex-direction: column;
     }
 
     .nodata{
@@ -98,8 +104,7 @@
         justify-content: center;
     }
     table {
-        grid-row: 1 / span 2; 
-        grid-column: 1 / span 2; 
+        
 
         background-color: var(--background);
         color: white;
@@ -134,6 +139,16 @@
         grid-row: 3 / span 2;
         grid-column: 1;
         min-height: 350px;
+    }
+
+    @media only screen and (min-width: 800px){
+        main{
+            display: grid;
+            grid-template-rows: 2fr 2fr;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            max-width: 100%;
+        }   
     }
 
 </style>
