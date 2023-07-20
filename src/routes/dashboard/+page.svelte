@@ -13,6 +13,26 @@
     const itemsPerPage = 10; // change this to the number of items you want per page
     let maxPages = 0;
 
+    let searchQuery = '';
+
+    // function for searching
+    const searchFunction = (item:any) => {
+        return item.Breach.Domain.toLowerCase().includes(searchQuery.toLowerCase());
+    }
+
+    let filteredData: any[] | null = [];
+
+    $: {
+        if(breachData && searchQuery) {
+            filteredData = breachData.filter(searchFunction);
+        } else {
+            filteredData = breachData;
+        }
+    }
+
+
+
+
 
 
     onMount(() => {
@@ -75,7 +95,7 @@
 </script>
 
 
-    {#if breachData}
+    {#if breachData && filteredData}
         {#if breachData[0]}
         <main>
             
@@ -93,19 +113,23 @@
                         {/each}
                     </div>
                 {/if}
+
+                <div class="tablecontrols">
+                    <input type="text" bind:value={searchQuery} placeholder="Search by domain..." />
+                </div>
                 <table>
                     <thead>
                         <tr>
                             <th>Leak</th>
                             <th>Domain</th>
                             <th>Pwn Count</th>
-                            <!-- <th>Logo</th> -->
                             <th>Is Verified</th>
                             <th>Acknowledged</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {#each breachData.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage) as item (item.breach_identifier)}
+                        {#each filteredData.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage) as item (item.breach_identifier)}
+
                             <tr>
                                 <td>{item.breach_identifier}</td>
                                 <td><a href="https://{item.Breach.Domain}">{item.Breach.Domain}</a></td>
@@ -140,6 +164,22 @@
     {/if}
 
 <style>
+
+    .tablecontrols {
+        margin-bottom: 1em;
+        
+    }
+
+    .tablecontrols input {
+        padding: 0.5em;
+        width: 100%;
+        box-sizing: border-box;
+        color: black;
+    }
+
+    input:focus{
+        outline: none;
+    }
 
     .pagination {
         display: flex;
