@@ -1,51 +1,38 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
-    import { Chart } from 'chart.js/auto';
+    import { afterUpdate, onMount, onDestroy } from 'svelte';
+    import { Chart, type ChartConfiguration } from 'chart.js/auto';
 
     /**
-   * @type {any[]}
-   */
+     * @type {any[]}
+     */
     export let chartData: any[];
 
     /**
-   * @type {string[]}
-   */
-    let chartLabels: string[] = [];
-    /**
-   * @type {number[]}
-   */
-    let chartValues: number[] = [];
-    let ctx: CanvasRenderingContext2D | null;
-    /**
-   * @type {HTMLCanvasElement}
-   */
+     * @type {HTMLCanvasElement}
+     */
     let chartCanvas: HTMLCanvasElement;
 
-    // Prepare data for the chart
-    const dataClassesCount: Record<string, number> = {};
+    let chartInstance: Chart | null = null;
 
-    chartData.forEach((item: any) => {
-        item.Breach.dataClasses.forEach((dataClass: string) => {
-            if (!dataClassesCount[dataClass]) {
-                dataClassesCount[dataClass] = 1;
-            } else {
-                dataClassesCount[dataClass]++;
-            }
+    const updateChart = () => {
+        // Prepare data for the chart
+        const dataClassesCount: Record<string, number> = {};
+
+        chartData.forEach((item: any) => {
+            item.Breach.dataClasses.forEach((dataClass: string) => {
+                if (!dataClassesCount[dataClass]) {
+                    dataClassesCount[dataClass] = 1;
+                } else {
+                    dataClassesCount[dataClass]++;
+                }
+            });
         });
-    });
 
-    chartLabels = Object.keys(dataClassesCount);
-    chartValues = Object.values(dataClassesCount);
+        const chartLabels = Object.keys(dataClassesCount);
+        const chartValues = Object.values(dataClassesCount);
 
-    onMount(async () => {
-        const context = chartCanvas.getContext('2d');
-        if (!context) {
-            console.error('Could not get 2D rendering context from canvas');
-            return;
-        }
-
-        ctx = context;
-        new Chart(ctx, {
+        // Chart configuration
+        const config: ChartConfiguration = {
             type: 'bar', 
             data: {
                 labels: chartLabels,
@@ -59,6 +46,15 @@
             options: {
                 indexAxis: 'y',
                 responsive: true,
+                animations: {
+                    tension: {
+                        duration: 1000,
+                        easing: 'linear',
+                        from: 1,
+                        to: 0,
+                        loop: true
+                    }
+                },
                 plugins: {
                     title: {
                         display: true,
@@ -105,11 +101,35 @@
                 },
                 maintainAspectRatio: false,
             }
-        });
+        };
+
+        if (chartInstance) {
+            chartInstance.destroy();
+        }
+
+        const context = chartCanvas.getContext('2d');
+        if (!context) {
+            console.error('Could not get 2D rendering context from canvas');
+            return;
+        }
+
+        chartInstance = new Chart(context, config);
+    };
+
+    onMount(() => {
+        updateChart();
     });
 
+    afterUpdate(() => {
+        updateChart();
+    });
+
+    onDestroy(() => {
+        if (chartInstance) {
+            chartInstance.destroy();
+        }
+    });
 
 </script>
 
-<canvas bind:this={chartCanvas} id="myChart"></canvas>
-
+<canvas bind:this={chartCanvas} class="myChart" style="height: 250px; width: 100%;"></canvas>

@@ -1,10 +1,12 @@
 <script lang="ts">
   import { fly } from "svelte/transition";
   import { onMount } from "svelte";
-  import { scan } from "../scan";
+  import { scan } from "$lib/scan";
   import Loader from "../components/Loader.svelte";
   import Results from "../components/Results.svelte";
   import { user } from "$lib/authStore";
+  import addBreachToDB from "$lib/saveToDB";
+  import sendEmail from "$lib/sendEmail";
   import { supabase } from "$lib/supabaseClient";
 
   let selected = null;
@@ -30,27 +32,11 @@
   let emailNotification = false;
   let dbSave = false;
 
-  async function sendEmail() {
-    const response = await fetch("/email", {
-      method: "POST",
-      body: JSON.stringify({ searchParam, scanResult }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    console.log(response);
-  }
+  
 
   async function saveToDB() {
     // console.log($user)
     const uid = $user?.user.id;
-    // const response = await fetch('/database', {
-    //     method: 'POST',
-    //     body: JSON.stringify({ scanResult, uid }),
-    //     headers: {
-    //         'Content-Type': 'application/json'
-    //     }
-    // });
     try{
         const response = await addBreachToDB(scanResult, uid);
         console.log(response);
@@ -63,97 +49,21 @@
     
   }
 
-  async function addBreachToDB(
-    scanResult: {
-      Name: any;
-      Title: any;
-      Domain: any;
-      BreachDate: any;
-      AddedDate: any;
-      ModifiedDate: any;
-      PwnCount: any;
-      Description: any;
-      DataClasses: any[];
-      LogoPath: any;
-      IsVerified: any;
-      IsFabricated: any;
-      IsSensitive: any;
-      IsSpamList: any;
-      IsMalware: any;
-    }[],
-    uid: string | undefined
-  ) {
-    try {
-      for (const result of scanResult) {
-        const { data, error } = await supabase.from("Breach").upsert(
-          [
-            {
-              Name: result.Name,
-              Title: result.Title,
-              Domain: result.Domain,
-              BreachDate: result.BreachDate,
-              AddedDate: result.AddedDate,
-              ModifiedDate: result.ModifiedDate,
-              PwnCount: result.PwnCount,
-              Description: result.Description,
-              LogoPath: result.LogoPath,
-              IsVerified: result.IsVerified,
-              IsFabricated: result.IsFabricated,
-              IsSensitive: result.IsSensitive,
-              IsSpamList: result.IsSpamList,
-              IsMalware: result.IsMalware,
-              dataClasses: result.DataClasses,
-            },
-          ],
-          {
-            onConflict: "Name",
-          }
-        );
-
-        if (error) {
-          console.error("Error in addBreachToDB:", error.message);
-        } else {
-          // console.log((await supabase.auth.getUser()))
-          if (uid) {
-            const userBreachInsert = await supabase
-              .from("User_Breaches")
-              .upsert({
-                user_identifier: uid,
-                breach_identifier: result.Name,
-                IsAcknowledged: false,
-              });
-            if (userBreachInsert.error) {
-              throw Error(userBreachInsert.error.message);
-            } else {
-              // console.log('added user breach data')
-            }
-          }
-          // console.log('addBreachToDB data:', data);
-        }
-      }
-
-      return { message: "Success" };
-    } catch (error) {
-      console.error("Error in addBreachToDB:", error);
-      return { error: error };
-    }
-  }
+  
 
   async function handleSubmit() {
     searching = true;
-    console.log(emailNotification);
     if (searchParam) {
       promise = scan(searchParam)
         .then((result) => {
           scanResult = result;
           searching = false; // save the result in api_data
           if (emailNotification) {
-            sendEmail();
+            sendEmail(searchParam, scanResult);
           }
           if (dbSave) {
             saveToDB();
           }
-          console.log(result);
           return result; // make sure to return the result so it's passed to the 'then' block
         })
         .catch((err) => {

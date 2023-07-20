@@ -4,10 +4,12 @@
     import type { LayoutData } from './$types';
     import Loader from '../../components/Loader.svelte';
     
-    export let data: LayoutData;
+    // export let data: LayoutData;
     import { user } from '$lib/authStore';
     import { supabase } from '$lib/supabaseClient';
     import { onMount } from 'svelte';
+    import { scan } from '$lib/scan';
+    import saveToDB from "$lib/saveToDB"
     let currentUser: PostgrestSingleResponse<{ FirstName: any; LastName: any; }[]>
     
     onMount(() => {
@@ -17,16 +19,15 @@
             .eq('auth_uuid', $user?.user.id)
             .then((res) => currentUser = res)
 
-            const User_Breaches = supabase.channel('custom-all-channel')
-            .on(
-                'postgres_changes',
-                { event: '*', schema: 'public', table: 'User_Breaches' },
-                (payload) => {
-                    console.log('Change received!', payload)
-                }
-            )
-            .subscribe()
     })
+    const handleScan = async () => {
+        if($user && $user.user.email){
+            const output = await scan($user.user.email)
+            await saveToDB(output, $user.user.id)
+        }
+
+    }
+
 </script>
 
 <main>
@@ -40,6 +41,7 @@
                 {/if}
             </h1>
             <button
+            on:click={() => handleScan()}
             >Scan</button>
         </div>
         <p>Here are the saved leaks from your account</p>

@@ -5,12 +5,15 @@
     import Chart from '../../components/Chart.svelte';
     import Loader from '../../components/Loader.svelte';
     import BarChart from '../../components/BarChart.svelte';
+    import { scan } from '$lib/scan';
 
     export let data;
     let breachData: any[] | null;
     let currentPage = 0;
     const itemsPerPage = 10; // change this to the number of items you want per page
     let maxPages = 0;
+
+
 
     onMount(() => {
         const breachOutput = supabase
@@ -23,8 +26,46 @@
             .eq('user_identifier', $user?.user.id)
             .then((res) => {
                 breachData = res.data;
+                // @ts-ignore
                 maxPages = Math.ceil(breachData.length / itemsPerPage);
             })
+
+            const User_Breaches = supabase.channel('custom-all-channel')
+                .on(
+                    'postgres_changes',
+                    { event: '*', schema: 'public', table: 'User_Breaches' },
+                    (payload) => {
+                        if(payload.eventType === 'INSERT'){
+                            // Inserted data will be in payload.new
+                            const newData = supabase
+                                .from('User_Breaches')
+                                .select(`
+                                    breach_identifier,
+                                    IsAcknowledged,
+                                    Breach ( Domain, PwnCount, LogoPath, IsVerified, BreachDate, dataClasses )
+                                `)
+                                .eq('user_identifier', $user?.user.id)
+                                .eq('breach_identifier', payload.new.breach_identifier)
+                                .then((res) => {
+                                    if(res.data){
+                                        if(breachData !== null){
+                                            breachData = [...breachData, res.data[0]]
+                                            maxPages = Math.ceil(breachData.length / itemsPerPage);
+                                        }
+                                        else {
+                                            // if breachData is null, initialize it with the new data
+                                            breachData = [res.data];
+                                            maxPages = 1; // As we have one item, the number of pages will be 1
+                                            maxPages = Math.ceil(breachData.length / itemsPerPage);
+                                        }
+                                    }
+                                    
+                                })
+                            
+                        }
+                    }
+                )
+                .subscribe();
     })
 
     function goToPage(page: number) {
@@ -156,6 +197,7 @@
     th, td {
         padding: 10px;
         border: none;
+        width: min-content;
     }
     th {
         text-align: left;

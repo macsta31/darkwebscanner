@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
-    import { Chart } from 'chart.js/auto'
+    import { afterUpdate, onMount, onDestroy } from 'svelte';
+    import { Chart, type ChartConfiguration } from 'chart.js/auto';
     import 'chartjs-adapter-date-fns';
     import { enUS } from 'date-fns/locale';
     import { startOfMonth, format, addMonths } from 'date-fns';
@@ -8,56 +8,50 @@
     export let chartData: any[];
 
     let chartCounts: { [key: string]: number } = {};
-    let chartLabels: string[] = [];
-    let ctx;
     let chartCanvas: HTMLCanvasElement;
+    let chartInstance: Chart | null = null;
 
-    // Prepare data for the chart
-    chartData.forEach(item => {
-        const date = startOfMonth(new Date(item.Breach.BreachDate));
-        const key = format(date, 'yyyy-MM', { locale: enUS });
-        
-        if (!chartCounts[key]) {
-            chartCounts[key] = 0;
-        }
-        chartCounts[key] += 1;  // Count each breach as 1
-    });
+    const updateChart = () => {
+        // Prepare data for the chart
+        chartCounts = {};
+        chartData.forEach(item => {
+            const date = startOfMonth(new Date(item.Breach.BreachDate));
+            const key = format(date, 'yyyy-MM', { locale: enUS });
+            
+            if (!chartCounts[key]) {
+                chartCounts[key] = 0;
+            }
+            chartCounts[key] += 1;  // Count each breach as 1
+        });
 
-    const sortedKeys = Object.keys(chartCounts).sort();
-    const sortedValues = sortedKeys.map(key => chartCounts[key]);
-    const accumulatedCounts = sortedValues.reduce((acc, value) => {
-        acc.push((acc.length > 0 ? acc[acc.length - 1] : 0) + value);
-        return acc;
-    }, [] as number[]);
+        const sortedKeys = Object.keys(chartCounts).sort();
+        const sortedValues = sortedKeys.map(key => chartCounts[key]);
+        const accumulatedCounts = sortedValues.reduce((acc, value) => {
+            acc.push((acc.length > 0 ? acc[acc.length - 1] : 0) + value);
+            return acc;
+        }, [] as number[]);
 
-    const start = new Date(sortedKeys[0]);
-    const end = new Date(sortedKeys[sortedKeys.length - 1]);
+        const start = new Date(sortedKeys[0]);
+        const end = new Date(sortedKeys[sortedKeys.length - 1]);
 
-    let pointer = start;
-    while (pointer <= end) {
-        const pointerKey = format(pointer, 'yyyy-MM', { locale: enUS });
-        if (!chartCounts[pointerKey]) {
-            chartCounts[pointerKey] = 0;
-        }
-        pointer = addMonths(pointer, 1);
-    }
-
-    const finalKeys = Object.keys(chartCounts).sort();
-    const finalValues = finalKeys.map(key => chartCounts[key]);
-    const finalAccumulatedCounts = finalValues.reduce((acc, value) => {
-        acc.push((acc.length > 0 ? acc[acc.length - 1] : 0) + value);
-        return acc;
-    }, [] as number[]);
-
-    onMount(async () => {
-        const context = chartCanvas.getContext('2d');
-        if (!context) {
-            console.error('Could not get 2D rendering context from canvas');
-            return;
+        let pointer = start;
+        while (pointer <= end) {
+            const pointerKey = format(pointer, 'yyyy-MM', { locale: enUS });
+            if (!chartCounts[pointerKey]) {
+                chartCounts[pointerKey] = 0;
+            }
+            pointer = addMonths(pointer, 1);
         }
 
-        ctx = context;
-        new Chart(ctx, {
+        const finalKeys = Object.keys(chartCounts).sort();
+        const finalValues = finalKeys.map(key => chartCounts[key]);
+        const finalAccumulatedCounts = finalValues.reduce((acc, value) => {
+            acc.push((acc.length > 0 ? acc[acc.length - 1] : 0) + value);
+            return acc;
+        }, [] as number[]);
+
+        // Chart configuration
+        const config: ChartConfiguration = {
             type: 'line',
             data: {
                 labels: finalKeys,
@@ -71,6 +65,16 @@
             },
             options: {
                 responsive: true,
+                animations: {
+                    tension: {
+                        duration: 1000,
+                        easing: 'linear',
+                        from: 1,
+                        to: 0,
+                        loop: false
+                    },
+                    
+                },
                 
                 plugins: {
                     title: {
@@ -111,9 +115,35 @@
                     }
                 },
             }
-        });
+        };
+
+        if (chartInstance) {
+            chartInstance.destroy();
+        }
+
+        const context = chartCanvas.getContext('2d');
+        if (!context) {
+            console.error('Could not get 2D rendering context from canvas');
+            return;
+        }
+
+        chartInstance = new Chart(context, config);
+    };
+
+    onMount(() => {
+        updateChart();
+    });
+
+    afterUpdate(() => {
+        updateChart();
+    });
+
+    onDestroy(() => {
+        if (chartInstance) {
+            chartInstance.destroy();
+        }
     });
 
 </script>
 
-<canvas bind:this={chartCanvas} id="myChart" style="height: 450px; width: 100%;"></canvas>
+<canvas bind:this={chartCanvas} class="myChart" style="height: 250px; width: 100%;"></canvas>
