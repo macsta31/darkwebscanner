@@ -11,7 +11,7 @@
     
     import '../global.css'
     import Loader from '../components/Loader.svelte';
-  import { goto } from '$app/navigation';
+    import { goto } from '$app/navigation';
 
     const handleLogin = async () => {
         // const res = await supabase.auth.signInWithPassword({
@@ -25,6 +25,8 @@
         
     }
 
+    // console.log($user)
+
     const handleLogout = async () => {
         const res = await supabase.auth.signOut();
         if($page.route.id !== '/'){
@@ -34,11 +36,14 @@
     }
 
     let dashboardSwitch: string | undefined
+    let profileSwitch: string | undefined
     $: if($user){
         dashboardSwitch = "dashboard"
+        profileSwitch = 'profile'
     }
     else{
         dashboardSwitch = "login"
+        profileSwitch = 'login'
     }
 
 </script>
@@ -53,10 +58,20 @@
             <h1>ISAIX</h1>
             <div>
                 <nav>
-                    <a href="/" class={$page.route.id === '/' ? 'active' : ''}>Home</a>
-                    <a href="/{dashboardSwitch}" class={$page.route.id === '/dashboard' ? 'active' : ''}>Dashboard</a>
-                    <a href="/news" class={$page.route.id === '/news' ? 'active' : ''}>News</a>
-                    
+                    <a href="/" 
+                       class={$page.route.id === '/' ? 'active' : ''} 
+                       on:click={e => {if ($page.route.id === '/') e.preventDefault()}}
+                    >Home</a>
+                
+                    <a href="/{dashboardSwitch}" 
+                       class={$page.route.id?.startsWith('/dashboard')  ? 'active' : ''} 
+                       on:click={e => {if ($page.route.id === `/${dashboardSwitch}`) e.preventDefault()}}
+                    >Dashboard</a>
+                
+                    <a href="/news" 
+                       class={$page.route.id === '/news' ? 'active' : ''} 
+                       on:click={e => {if ($page.route.id === '/news') e.preventDefault()}}
+                    >News</a>
                 </nav>
             
                 <button>Contact Us</button>

@@ -5,30 +5,10 @@
     import Chart from '../../components/Chart.svelte';
     import Loader from '../../components/Loader.svelte';
     import BarChart from '../../components/BarChart.svelte';
-    import { scan } from '$lib/scan';
-
-    export let data;
+    import Table from '../../components/Table.svelte';
     let breachData: any[] | null;
-    let currentPage = 0;
-    const itemsPerPage = 10; // change this to the number of items you want per page
-    let maxPages = 0;
 
-    let searchQuery = '';
 
-    // function for searching
-    const searchFunction = (item:any) => {
-        return item.Breach.Domain.toLowerCase().includes(searchQuery.toLowerCase());
-    }
-
-    let filteredData: any[] | null = [];
-
-    $: {
-        if(breachData && searchQuery) {
-            filteredData = breachData.filter(searchFunction);
-        } else {
-            filteredData = breachData;
-        }
-    }
 
 
 
@@ -46,8 +26,6 @@
             .eq('user_identifier', $user?.user.id)
             .then((res) => {
                 breachData = res.data;
-                // @ts-ignore
-                maxPages = Math.ceil(breachData.length / itemsPerPage);
             })
 
             const User_Breaches = supabase.channel('custom-all-channel')
@@ -70,16 +48,12 @@
                                     if(res.data){
                                         if(breachData !== null){
                                             breachData = [...breachData, res.data[0]]
-                                            maxPages = Math.ceil(breachData.length / itemsPerPage);
+                            
                                         }
                                         else {
-                                            // if breachData is null, initialize it with the new data
                                             breachData = [res.data];
-                                            maxPages = 1; // As we have one item, the number of pages will be 1
-                                            maxPages = Math.ceil(breachData.length / itemsPerPage);
                                         }
                                     }
-                                    
                                 })
                             
                         }
@@ -88,60 +62,26 @@
                 .subscribe();
     })
 
-    function goToPage(page: number) {
-        currentPage = page;
-    }
 
 </script>
 
 
-    {#if breachData && filteredData}
+    {#if breachData}
         {#if breachData[0]}
-        <main>
+            <main>
+                <Table 
+                tableData={breachData} 
+                columns={[
+                    {key: 'breach_identifier', name: 'Leak'},
+                    {key: 'Breach.Domain', name: 'Domain', render: val => `<a href="https://${val}">${val}</a>`},
+                    {key: 'Breach.PwnCount', name: 'Pwn Count'},
+                    {key: 'Breach.IsVerified', name: 'Is Verified', render: val => val ? 'Verified' : 'Not Verified'},
+                    {key: 'IsAcknowledged', name: 'Acknowledged', render: val => `<input type="checkbox" ${val ? "checked" : ""} disabled>`}
+                ]} 
+            />
             
-            <div class="tablecontainer">
-                {#if maxPages > 1}
-                    <div class="pagination">
-                        Page:
-                        {#each Array(maxPages) as _, i}
-                            <button 
-                                class="{currentPage === i ? 'active' : ''}" 
-                                on:click={() => goToPage(i)}
-                            >
-                                {i + 1}
-                            </button>
-                        {/each}
-                    </div>
-                {/if}
 
-                <div class="tablecontrols">
-                    <input type="text" bind:value={searchQuery} placeholder="Search by domain..." />
-                </div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Leak</th>
-                            <th>Domain</th>
-                            <th>Pwn Count</th>
-                            <th>Is Verified</th>
-                            <th>Acknowledged</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {#each filteredData.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage) as item (item.breach_identifier)}
-
-                            <tr>
-                                <td>{item.breach_identifier}</td>
-                                <td><a href="https://{item.Breach.Domain}">{item.Breach.Domain}</a></td>
-                                <td>{item.Breach.PwnCount}</td>
-                                <!-- <td><img src={item.Breach.LogoPath} alt={item.breach_identifier} width="50" height="50"/></td> -->
-                                <td>{item.Breach.IsVerified ? 'Verified' : 'Not Verified'}</td>
-                                <td><input type="checkbox" value={item.IsAcknowledged}></td>
-                            </tr>
-                        {/each}
-                    </tbody>
-                </table>
-            </div>
+            
                 <div class="otherinfo">
                     <BarChart chartData={breachData}/>
                 </div>
@@ -165,46 +105,8 @@
 
 <style>
 
-    .tablecontrols {
-        margin-bottom: 1em;
-        
-    }
-
-    .tablecontrols input {
-        padding: 0.5em;
-        width: 100%;
-        box-sizing: border-box;
-        color: black;
-    }
-
-    input:focus{
-        outline: none;
-    }
-
-    .pagination {
-        display: flex;
-        justify-content: center;
-        gap: 1rem;
-        margin: 1rem 0;
-        align-items: center        
-
-    }
-
-    .pagination > button{
-        font-size: 1rem;
-        padding: 0.5rem 1rem;
-        border-radius: 1rem;
-    }
-
-    .pagination > .active{
-        background-color: var(--accent)
-    }
-
-    .tablecontainer {
-        overflow-x: auto;
-        grid-row: 1 / span 2; 
-        grid-column: 1 / span 2; 
-    }
+    
+    
     main{
         
         display: flex;
@@ -223,33 +125,7 @@
         display: flex;
         justify-content: center;
     }
-    table {
-        
 
-        background-color: var(--background);
-        color: white;
-        width:100%;
-        border-collapse: collapse;
-        border-spacing: 0;
-        border-radius: 10px;
-        overflow: hidden;
-    }
-    th, td {
-        padding: 10px;
-        border: none;
-        width: min-content;
-    }
-    th {
-        text-align: left;
-        background-color: var(--accent);
-        color: white;
-    }
-    tr:nth-child(even) td {
-        background-color: #033349; /* Shade for even rows */
-    }
-    tr:nth-child(odd) td {
-        background-color: #022439; /* Shade for odd rows */
-    }
 
     .chart{
         grid-row: 3 / span 2;

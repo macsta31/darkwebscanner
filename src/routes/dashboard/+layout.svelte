@@ -10,6 +10,8 @@
     import { onMount } from 'svelte';
     import { scan } from '$lib/scan';
     import saveToDB from "$lib/saveToDB"
+    import { goto } from '$app/navigation';
+    import { page } from '$app/stores';
     let currentUser: PostgrestSingleResponse<{ FirstName: any; LastName: any; }[]>
     
     onMount(() => {
@@ -40,9 +42,20 @@
                     {currentUser.data[0].FirstName} {currentUser.data[0].LastName}
                 {/if}
             </h1>
-            <button
-            on:click={() => handleScan()}
-            >Scan</button>
+            <div>
+                {#if $page.route.id === '/dashboard'}
+                    <button on:click={() => goto('/dashboard/company')}>
+                        Company Dashboard
+                    </button>
+                {:else}
+                    <button on:click={() => goto('/dashboard')}>
+                        My Dashboard
+                    </button>
+                {/if}
+                <button
+                on:click={() => handleScan()}
+                >Scan</button>
+            </div>
         </div>
         <p>Here are the saved leaks from your account</p>
         
