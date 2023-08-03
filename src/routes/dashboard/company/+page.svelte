@@ -133,7 +133,7 @@
       <Table 
       tableData={companyInfo} 
       columns={[
-          {key: 'role', name: 'User email'},
+          {key: 'role', name: 'Role'},
           {key: 'Users.FirstName', name: 'First Name'},
           {key: 'Users.LastName', name: 'LastName'},
           {key: 'user_email', name: 'Email'},
