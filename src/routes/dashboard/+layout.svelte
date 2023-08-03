@@ -13,6 +13,8 @@
     import { goto } from '$app/navigation';
     import { page } from '$app/stores';
     let currentUser: PostgrestSingleResponse<{ FirstName: any; LastName: any; }[]>
+
+    let scanning:boolean = false
     
     onMount(() => {
         const output = supabase
@@ -23,9 +25,11 @@
 
     })
     const handleScan = async () => {
+        
         if($user && $user.user.email){
+            scanning = true
             const output = await scan($user.user.email)
-            await saveToDB(output, $user.user.id)
+            saveToDB(output, $user.user.id).then((res) => scanning = false)
         }
 
     }
@@ -52,9 +56,14 @@
                         My Dashboard
                     </button>
                 {/if}
-                <button
-                on:click={() => handleScan()}
-                >Scan</button>
+                {#if !scanning}
+                    <button
+                    on:click={() => handleScan()}
+                    >Scan</button>
+                {:else}
+                    <Loader />
+                {/if}
+                
             </div>
         </div>
         <p>Here are the saved leaks from your account</p>
@@ -67,7 +76,10 @@
 </main>
 
 <style>
-
+    div{
+        display: flex;
+        align-items: center;
+    }
 
 
     button{

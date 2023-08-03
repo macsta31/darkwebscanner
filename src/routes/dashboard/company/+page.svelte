@@ -5,7 +5,6 @@
     import Table from '../../../components/Table.svelte';
     import Modal from '../../../components/Modal.svelte';
     import Loader from '../../../components/Loader.svelte';
-    import { set } from 'date-fns';
     import { goto } from '$app/navigation';
     let companyInfo:any
     let isModalOpen = false;
@@ -63,7 +62,6 @@
             .eq('company_admin', $user?.user.id)
             .then((res) => {
                 if(res.data && res.data[0]){
-                    console.log(res.data)
                     company_id = res.data[0].id
                 }
                 loading = false
@@ -71,21 +69,42 @@
         
     })
 
+    async function getUserBreachCounts(data: any[]){
+        const output = await Promise.all(data.map(async (user) => {
+            const { data: userData, error } = await supabase
+                .from('User_Breaches')
+                .select('*')
+                .eq('user_identifier', user.user_id);
+
+            // Append the length of the returned data to the original user object
+            if (userData) {
+                user['breach_count'] = userData.length;
+            } else {
+                user['breach_count'] = 0; // or any default value
+            }
+            
+            return user;
+        }));
+        return output;
+    }   
+
+
     $: if(company_id){
-        console.log(company_id)
         supabase
         .from('User_Company')
         .select(`
             *,
-            Users ( FirstName, LastName, email ),
+            Users ( FirstName, LastName, auth_uuid ),
             Company ( company_name )
         `)
         .eq('company_id', company_id)
         .then((res) => {
-            console.log(res)
             if(res.data?.length && res.data.length > 0){
-            companyInfo = res.data[0];
-            console.log(res.data[0]);
+                let counts
+                getUserBreachCounts(res.data)
+                    .then((res) => {
+                        companyInfo = res
+                    })
             }   
         })
     }
@@ -110,14 +129,15 @@
   {:else}
   <main>
     {#if companyInfo}
-      <h2>{companyInfo.Company.company_name}</h2>
+      <h2>{companyInfo[0].Company.company_name}</h2>
       <Table 
-      tableData={[companyInfo]} 
+      tableData={companyInfo} 
       columns={[
           {key: 'role', name: 'User email'},
           {key: 'Users.FirstName', name: 'First Name'},
           {key: 'Users.LastName', name: 'LastName'},
-          {key: 'user_email', name: 'Email'}
+          {key: 'user_email', name: 'Email'},
+          {key: 'breach_count', name: 'Breach Count'}
       ]} 
   />
   

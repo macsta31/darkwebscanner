@@ -11,8 +11,9 @@
     let maxPages = 0;
   
     function getNestedProp(obj: any, path: string) {
-      return path.split('.').reduce((o, p) => o[p], obj);
+      return path.split('.').reduce((o, p) => (o && o[p] ? o[p] : ''), obj);
     }
+
   
     const searchFunction = (item:any) => {
       const columnData = getNestedProp(item, searchColumn).toString();
@@ -68,7 +69,7 @@
           </tr>
         </thead>
         <tbody>
-          {#each filteredData.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage) as item (item.breach_identifier)}
+          {#each filteredData.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage) as item, index (index)}
             <tr>
               {#each columns as column}
                 <td>

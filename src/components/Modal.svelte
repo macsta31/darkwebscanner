@@ -1,14 +1,20 @@
-<script>
+<script lang="ts">
     import { createEventDispatcher } from 'svelte';
     const dispatch = createEventDispatcher();
   
     function closeModal() {
       dispatch('close');
     }
+
+    function handleKeyDown(e:KeyboardEvent){
+      if(e.key === 'Escape'){
+        dispatch('close')
+      }
+    }
   </script>
   
-  <div class="modal-background" on:click={closeModal}>
-    <div class="modal-content" on:click={(e) => e.stopPropagation()}>
+  <div class="modal-background" on:click={closeModal} on:keydown={(e) => handleKeyDown(e)} role="none">
+    <div class="modal-content" on:click={(e) => e.stopPropagation()} on:keydown={(e) => handleKeyDown(e)} role="none">
       <slot></slot>
     </div>
   </div>
