@@ -69,7 +69,7 @@
      <Loader />
     {:else}
         <header>
-            <h1>ISAIX</h1>
+            <a href="/" ><h1>ISAIX</h1></a>
             <div>
                 <nav>
                     <a href="/" 
@@ -195,6 +195,7 @@ header {
 
     
 }
+
 
 
 </style>
