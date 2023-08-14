@@ -7,7 +7,6 @@
   import { user } from "$lib/authStore";
   import addBreachToDB from "$lib/saveToDB";
   import sendEmail from "$lib/sendEmail";
-  import { supabase } from "$lib/supabaseClient";
 
   let selected = null;
 
@@ -73,6 +72,8 @@
         });
     }
   }
+
+
 
   let loaded = false;
 

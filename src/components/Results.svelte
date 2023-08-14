@@ -195,7 +195,7 @@
 
 <style>
     p{
-        text-align: center;
+        text-align: left;
     }
     #noResultsSection{
         width: 100%;
@@ -212,6 +212,7 @@
 
     .scroll-container{
         display: flex;
+        
     }
 
     aside {
@@ -320,35 +321,15 @@
         transform: scale(0.9)
     }
 
-/* @media only screen and (min-width: 600px){
-    main{
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-        justify-content: center;
+@media only screen and (min-width: 600px){
+    .scroll-container{
+        max-width: 30%;
     }
-    main > *{
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-    }
-
-    main > * > p{
-        text-align: left;
-    }
-
-    .downloadbutton{
-        padding: 0;
-        align-items: flex-start;
-    }
-
-    aside{
-        max-height: 100%;
-    }
-} */
+}
 
 
 @media only screen and (min-width: 1000px){
+
 
     .breachdate {
         display: block !important
@@ -452,6 +433,7 @@
         position: relative;
         display: flex;
         flex-direction: column;
+        max-width: 50%;
     }
 
     main {

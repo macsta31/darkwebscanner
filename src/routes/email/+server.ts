@@ -30,7 +30,7 @@ async function sendMail(searchParam: any, scanResult: { Name: any; Title: any; D
     .then((res) => {
       console.log(res);
       return { 
-        status: 200, 
+        status: 200,
         body: res
       };
     })

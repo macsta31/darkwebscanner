@@ -5,9 +5,13 @@
     import { inject } from '@vercel/analytics';
     import { navigating } from '$app/stores';
     import { user } from '$lib/authStore';
+    import { lock } from '$lib/lockStore';
     import { page } from '$app/stores';
  
     inject({ mode: dev ? 'development' : 'production' });
+
+
+    let token
     
     import '../global.css'
     import Loader from '../components/Loader.svelte';
@@ -46,6 +50,16 @@
         profileSwitch = 'login'
     }
 
+
+    onMount(() => {
+        token = sessionStorage.getItem('token')
+        console.log($page)
+        if($page.route.id !== '/unlock'){
+            if($lock && !token){
+                goto(`/unlock?from=${$page.route.id}`)
+            }
+        } 
+    })
 </script>
 
 
