@@ -6,6 +6,7 @@
   import Modal from "../../../components/Modal.svelte";
   import Loader from "../../../components/Loader.svelte";
   import { goto } from "$app/navigation";
+  import { page } from "$app/stores";
   let companyInfo: any;
   let isModalOpen = false;
   let loading = true;
@@ -46,7 +47,7 @@
     if (!domain.includes("http://") && !domain.includes("https://")) {
       throw Error("Invalid email format: provide http:// or https://");
     }
-    // const validEmails = [...emailArray.filter(email => emailRegex.test(email)), $user?.user.email];
+    const validEmails = [...emailArray.filter(email => emailRegex.test(email)), $user?.user.email];
     // console.log(companyName)
     // console.log(validEmails);
 
@@ -55,7 +56,7 @@
       .upsert({
         company_name: companyName,
         company_admin: $user?.user.id,
-        employee_emails: [$user?.user.email],
+        employee_emails: validEmails,
         domain: domain,
       })
       .select()
@@ -71,8 +72,9 @@
             })
             .then((res) => {
               console.log(res);
+              isModalOpen = false;
             });
-          isModalOpen = false;
+          
         } else {
           console.log(res.error);
         }
@@ -122,7 +124,7 @@
         `
             *,
             Users ( FirstName, LastName, auth_uuid ),
-            Company ( company_name )
+            Company ( company_name, employee_emails )
         `
       )
       .eq("company_id", company_id)
@@ -143,6 +145,8 @@
   function closeModal() {
     isModalOpen = false;
   }
+
+  $: console.log(companyInfo)
 </script>
 
 {#if loading}
@@ -201,6 +205,10 @@
               <label for="domain">
                 Company Domain:
                 <input type="text" bind:value={domain} placeholder="ACME.com" />
+              </label>
+              <label for="domain">
+                Employee Emails:
+                <input type="text" bind:value={employeeEmails} placeholder="example@example.com, example1@example1.com" />
               </label>
               <button type="submit">Submit</button>
             </form>
