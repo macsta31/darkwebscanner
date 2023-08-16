@@ -36,6 +36,7 @@ export async function POST({ request }) {
     const { employer } = await request.json();
     try{
         const res = await searchRocketReach(employer)
+        // console.log(res)
         return json(res)
     }
     catch(error){

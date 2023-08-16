@@ -1,5 +1,6 @@
 <script lang="ts">
     import { onMount } from "svelte";
+    
   
     export let tableData: any[];
     export let columns: {key: string, name: string, render?: (val: any) => string}[];
@@ -22,6 +23,7 @@
   
     $: {
       if(tableData && searchQuery) {
+        
         filteredData = tableData.filter(searchFunction);
       } else {
         filteredData = tableData;

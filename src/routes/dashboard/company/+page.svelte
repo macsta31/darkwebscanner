@@ -19,6 +19,81 @@
   let emailSearching = false;
   let employeeEmailsFromSearch: any[] = [];
 
+  let addEmailsModal = false;
+
+  let newEmails = "";
+
+  async function updateCompanyEmails() {
+    
+    // Split the input by commas, then trim each email to remove whitespace
+    const emailsCleaned = newEmails.split(",").map(email => email.trim());
+
+    // Combine the old emails with the new ones
+    let compoundEmails = [...new Set([...companyInfo[0].Company.employee_emails, ...emailsCleaned])];
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+    const validEmails = [...compoundEmails.filter(email => emailRegex.test(email))];
+
+
+    // Uncomment the below code when you're ready to update the database
+    supabase
+      .from('Company')
+      .update({ employee_emails: validEmails })
+      .eq('id', company_id)
+      .select()
+      .then((res) => {
+        closeEmailsModal()
+      }) 
+  } 
+
+  async function removeEmail(emailToRemove:string) {
+    supabase
+      .from('Company')
+      .update({ employee_emails: companyInfo[0].Company.employee_emails.filter((email:string) => email !== emailToRemove) })
+      .eq('id', company_id)
+      .select()
+      .then((res) => { 
+        console.log(res)
+      }) 
+  }
+
+
+
+  let searchTerm = '';
+  let filteredEmails = companyInfo && companyInfo[0].Company.employee_emails.filter((email: string | string[]) => email.includes(searchTerm));
+
+  $: filteredEmails = companyInfo && companyInfo[0]?.Company?.employee_emails ? 
+    companyInfo[0].Company.employee_emails.filter((email: string | string[]) => email.includes(searchTerm)) :
+    [];
+
+  const rowsPerPage = 10;
+  let currentPage = 1;    
+  let totalPages:number
+  $: {
+    totalPages = Math.ceil(filteredEmails.length / rowsPerPage)
+  }
+
+  function nextPage() {
+      if (currentPage < totalPages) {
+          currentPage += 1;
+      }
+  }
+
+  function previousPage() {
+      if (currentPage > 1) {
+          currentPage -= 1;
+      }
+  }
+
+  let displayedEmails:string[]
+
+  $:{
+    displayedEmails = filteredEmails.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+  }
+
+
+
+
   const searchdomainToemail = async (companyName:string) => {
     emailSearching = true
     try{
@@ -30,7 +105,7 @@
         },
       });
       const responseData = await response.json()
-      // console.log(responseData)
+      console.log(responseData)
       employeeEmailsFromSearch = responseData.profiles
     }
     catch(error){
@@ -48,8 +123,7 @@
       throw Error("Invalid email format: provide http:// or https://");
     }
     const validEmails = [...emailArray.filter(email => emailRegex.test(email)), $user?.user.email];
-    // console.log(companyName)
-    // console.log(validEmails);
+
 
     supabase
       .from("Company")
@@ -94,6 +168,20 @@
         }
         loading = false;
       });
+
+
+    const Company = supabase.channel('custom-all-channel')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'Company' },
+        (payload) => {
+          if(payload.eventType = "UPDATE"){
+            // @ts-ignore
+            companyInfo[0].Company.employee_emails = payload.new.employee_emails
+          }
+        }
+      )
+      .subscribe()
   });
 
   async function getUserBreachCounts(data: any[]) {
@@ -138,6 +226,8 @@
       });
   }
 
+
+
   function openModal() {
     isModalOpen = true;
   }
@@ -146,7 +236,14 @@
     isModalOpen = false;
   }
 
-  $: console.log(companyInfo)
+  function closeEmailsModal() {
+    addEmailsModal = false;
+  }
+
+  function openEmailModal() {
+    addEmailsModal = true
+  }
+
 </script>
 
 {#if loading}
@@ -157,6 +254,7 @@
   <main>
     {#if companyInfo}
       <h2>{companyInfo[0].Company.company_name}</h2>
+      <h3>Registered Users</h3>
       <Table
         tableData={companyInfo}
         columns={[
@@ -168,6 +266,72 @@
         ]}
       />
       <section>
+        {#if addEmailsModal}
+          <Modal on:close={closeEmailsModal}>
+            <div class="modal">
+              <h2>Add Emails</h2>
+              <form action="" on:submit|preventDefault={updateCompanyEmails}>
+                <label for="emails" class="emailsTextAreaLabel">
+                  Emails:
+                  <textarea name="emails" id="" cols="30" rows="10" bind:value={newEmails} placeholder="Enter Emails separated by commas"></textarea>
+                </label>
+                <button type="submit" >Submit</button>
+              </form>
+            </div>
+          </Modal>
+        {/if}
+        <div class="employeeEmails">
+          <div class="emailsHeader">
+            <h3>Employee Emails</h3>
+            <button on:click={openEmailModal}>Add Emails</button>
+          </div>
+          
+          
+          {#if companyInfo}
+          <div class="tablecontainer">
+
+          <div class="searchBar">
+              <input bind:value={searchTerm} placeholder="Search by email" />
+          </div>
+            <table>
+              <thead>
+                  <tr>
+                      <th>Email Addresses</th>
+                      <th>Tools</th>
+                  </tr>
+              </thead>
+              <tbody>
+                {#if displayedEmails && displayedEmails.length}
+                    {#each displayedEmails as email (email)}
+                        <tr>
+                            <td>{email}</td>
+                            <td class="svgIcon">
+                              <button on:click={() => removeEmail(email)}>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+                                    <path d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z" fill="white"/>
+                                </svg>
+                              </button>
+                            </td>
+                        </tr>
+                    {/each}
+                {:else}
+                    <tr>
+                        <td>No emails found.</td>
+                        <td></td>
+                    </tr>
+                {/if}
+            
+              </tbody>
+            </table>
+            <div class="pagination">
+                <button on:click={previousPage}>Previous</button>
+                <span>Page {currentPage} of {totalPages}</span>
+                <button on:click={nextPage}>Next</button>
+            </div>
+            
+          </div>
+          {/if}
+        </div>
         <h2>Employee Email Discovery</h2>
         <h4>Click below to scan for employee emails available on the web</h4>
         {#if !emailSearching}
@@ -221,7 +385,107 @@
 
 <style>
 
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+  .svgIcon{
+    justify-self: right;
+  }
+
+  svg{
+    padding-top: 3px;
+    width: 20px;
+    height: 20px;
+  }
+  .emailsTextAreaLabel{
+    display: flex;
+    flex-direction: column;
+  }
+
+  .emailsTextAreaLabel > textarea {
+    padding: 0.5rem;
+    color: black;
+  }
+
+  .emailsHeader{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding-bottom: 1rem;
+  }
+
+.searchBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.searchBar input {
+    padding: 0.5rem;
+    border: 1px solid var(--accent);
+    transition: border 0.3s ease;
+}
+
+.searchBar input:focus {
+    border: 1px solid var(--background);
+    outline: none;
+}
+
+
+.tablecontainer {
+  padding-top: 1rem;
+  overflow-x: auto;
+  grid-row: 1 / span 2; 
+  grid-column: 1 / span 2;
+  width: 100%;
+}
+
+    table {
+        background-color: var(--background);
+        color: white;
+        width:100%;
+        border-collapse: collapse;
+        border-spacing: 0;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    th, td {
+        padding: 10px;
+        border: none;
+    }
+
+    th:nth-child(2), td:nth-child(2) {
+        width: 50px; /* This can be adjusted based on your needs */
+        white-space: nowrap; /* Ensures the content does not wrap and the cell doesn't grow vertically */
+        text-align: center;
+    }
+    th {
+        text-align: left;
+        background-color: var(--accent);
+        color: white;
+    }
+    tr:nth-child(even) td {
+        background-color: #033349; /* Shade for even rows */
+    }
+    tr:nth-child(odd) td {
+        background-color: #022439; /* Shade for odd rows */
+    }
+  .employeeEmails{
+    width:100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
   section{
+    width:100%;
     display: flex;
     justify-content: center;
     flex-direction: column;
@@ -243,6 +507,7 @@
     padding: 0.5rem 1.5rem;
     border-radius: 1rem;
     transition: all 1s ease;
+    width: 120px;
   }
 
   .modal {
@@ -272,7 +537,7 @@
     color: black;
     width: 100%;
     padding: 0.5rem;
-    border-radius: 0.5rem;
+    border-radius: 0.25rem;
     border: 1px solid grey;
   }
 
@@ -290,5 +555,12 @@
     width: 100%;
     display: grid;
     place-content: center;
+  }
+
+  h3{
+    width: 100%;
+    justify-self: flex-start;
+    text-decoration: underline;
+    
   }
 </style>

@@ -53,7 +53,6 @@
 
     onMount(() => {
         token = sessionStorage.getItem('token')
-        console.log($page)
         if($page.route.id !== '/unlock'){
             if($lock && !token){
                 goto(`/unlock?from=${$page.route.id}`)
@@ -69,7 +68,7 @@
      <Loader />
     {:else}
         <header>
-            <a href="/" ><h1>ISAIX</h1></a>
+            <a href="/"><h1>ISAIX</h1></a>
             <div>
                 <nav>
                     <a href="/" 
