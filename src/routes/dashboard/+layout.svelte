@@ -15,6 +15,8 @@
     let currentUser: PostgrestSingleResponse<{ FirstName: any; LastName: any; }[]>
 
     let scanning:boolean = false
+
+    console.log($page)
     
     onMount(() => {
         const output = supabase
@@ -57,9 +59,11 @@
                     </button>
                 {/if}
                 {#if !scanning}
-                    <button
-                    on:click={() => handleScan()}
-                    >Scan</button>
+                    {#if $page.route.id !== '/dashboard/company'}
+                        <button
+                        on:click={() => handleScan()}
+                        >Scan</button>
+                    {/if}
                 {:else}
                     <Loader />
                 {/if}
