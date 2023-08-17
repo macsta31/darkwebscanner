@@ -24,3 +24,29 @@ export async function scan(searchParam: string) {
             // console.error('Error:', error);
         });
 }
+
+
+export async function scanBatch(emails: string[]){
+    const apiUrl = `https://dw-proxy-server.vercel.app/api/breachedaccountsbatch`
+    // const apiUrl = 'http://localhost:3000/api/breachedaccountsbatch'
+    try {
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ emails: emails })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Server responded with a ${response.status} status.`);
+        }
+
+        const data = await response.json();
+        return data;
+
+    } catch (error) {
+        console.error("Error calling the API:", error);
+        return null;
+    }
+}

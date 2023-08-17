@@ -6,6 +6,7 @@
     import Loader from '../../components/Loader.svelte';
     import BarChart from '../../components/BarChart.svelte';
     import Table from '../../components/Table.svelte';
+    
     let breachData: any[] | null;
 
 
@@ -61,6 +62,8 @@
                 )
                 .subscribe();
     })
+
+    
 
 
 </script>

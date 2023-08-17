@@ -2,6 +2,7 @@
   import { supabase } from "$lib/supabaseClient";
   import { user } from "$lib/authStore";
   import { onMount } from "svelte";
+  import { scanBatch } from '$lib/scan';
   import Table from "../../../components/Table.svelte";
   import Modal from "../../../components/Modal.svelte";
   import Loader from "../../../components/Loader.svelte";
@@ -243,6 +244,17 @@
   function openEmailModal() {
     addEmailsModal = true
   }
+  let batchscanning = false;
+
+  const scanBatchEmails = async () => {
+      batchscanning = true
+      scanBatch(companyInfo[0].Company.employee_emails)
+      .then((res) => {
+        console.log(res)
+        batchscanning = false
+      })
+      
+  }
 
 </script>
 
@@ -284,6 +296,11 @@
           <div class="emailsHeader">
             <h3>Employee Emails</h3>
             <button on:click={openEmailModal}>Add Emails</button>
+            {#if batchscanning}
+              <Loader />
+            {:else}
+              <button on:click={() => scanBatchEmails()} >Scan Emails</button>
+            {/if}
           </div>
           
           
@@ -416,6 +433,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 1rem;
     width: 100%;
     padding-bottom: 1rem;
   }
@@ -507,7 +525,7 @@
     padding: 0.5rem 1.5rem;
     border-radius: 1rem;
     transition: all 1s ease;
-    width: 120px;
+    width: 150px;
   }
 
   .modal {
