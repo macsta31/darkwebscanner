@@ -12,6 +12,7 @@
     import saveToDB from "$lib/saveToDB"
     import { goto } from '$app/navigation';
     import { page } from '$app/stores';
+    import { lock } from '$lib/lockStore';
     let currentUser: PostgrestSingleResponse<{ FirstName: any; LastName: any; }[]>
 
     let scanning:boolean = false
@@ -19,6 +20,13 @@
     console.log($page)
     
     onMount(() => {
+        if(!sessionStorage.getItem('token')){
+            goto(`/unlock?from=${$page.route.id}`)
+        }
+        // else if(!$user){
+        //     goto('/login')
+        // }
+        
         const output = supabase
             .from('Users')
             .select(`FirstName, LastName`)

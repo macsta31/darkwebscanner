@@ -11,7 +11,7 @@
     inject({ mode: dev ? 'development' : 'production' });
 
 
-    let token
+    let token: string | null
     
     import '../global.css'
     import Loader from '../components/Loader.svelte';
@@ -23,6 +23,7 @@
         //     password: 'admin123'
         // })
         // // console.log(res)
+        
         if($page.route.id !== '/login'){
             goto('/login')
         }
@@ -41,7 +42,8 @@
 
     let dashboardSwitch: string | undefined
     let profileSwitch: string | undefined
-    $: if($user){
+    $:
+    if($user){
         dashboardSwitch = "dashboard"
         profileSwitch = 'profile'
     }
@@ -49,8 +51,6 @@
         dashboardSwitch = "login"
         profileSwitch = 'login'
     }
-
-
     onMount(() => {
         token = sessionStorage.getItem('token')
         if($page.route.id !== '/unlock'){
@@ -69,31 +69,32 @@
     {:else}
         <header>
             <a href="/"><h1>ISAIX</h1></a>
-            <div>
-                <nav>
-                    <a href="/" 
-                       class={$page.route.id === '/' ? 'active' : ''} 
-                       on:click={e => {if ($page.route.id === '/') e.preventDefault()}}
-                    >Home</a>
+                <div>
+                    <nav>
+                        <a href="/" 
+                        class={$page.route.id === '/' ? 'active' : ''} 
+                        on:click={e => {if ($page.route.id === '/') e.preventDefault()}}
+                        >Home</a>
+                    
+                        <a href="/{dashboardSwitch}" 
+                        class={$page.route.id?.startsWith('/dashboard')  ? 'active' : ''} 
+                        on:click={e => {if ($page.route.id === `/${dashboardSwitch}`) e.preventDefault()}}
+                        >Dashboard</a>
+                    
+                        <a href="/news" 
+                        class={$page.route.id === '/news' ? 'active' : ''} 
+                        on:click={e => {if ($page.route.id === '/news') e.preventDefault()}}
+                        >News</a>
+                    </nav>
+                    
                 
-                    <a href="/{dashboardSwitch}" 
-                       class={$page.route.id?.startsWith('/dashboard')  ? 'active' : ''} 
-                       on:click={e => {if ($page.route.id === `/${dashboardSwitch}`) e.preventDefault()}}
-                    >Dashboard</a>
-                
-                    <a href="/news" 
-                       class={$page.route.id === '/news' ? 'active' : ''} 
-                       on:click={e => {if ($page.route.id === '/news') e.preventDefault()}}
-                    >News</a>
-                </nav>
-            
-                <button>Contact Us</button>
-                {#if $user}
-                    <button on:click={() => handleLogout()} >Log Out</button>
-                {:else}
-                    <button on:click={() => handleLogin()}>Log In</button>
-                {/if}
-            </div>
+                    <button>Contact Us</button>
+                    {#if $user}
+                        <button on:click={() => handleLogout()} >Log Out</button>
+                    {:else}
+                        <button on:click={() => handleLogin()}>Log In</button>
+                    {/if}
+                </div>
         </header>
         <slot />
     {/if}

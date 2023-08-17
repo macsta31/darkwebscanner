@@ -8,6 +8,7 @@
   import Loader from "../../../components/Loader.svelte";
   import { goto } from "$app/navigation";
   import { page } from "$app/stores";
+  import Results from "../../../components/Results.svelte";
   let companyInfo: any;
   let isModalOpen = false;
   let loading = true;
@@ -244,6 +245,8 @@
   function openEmailModal() {
     addEmailsModal = true
   }
+
+  let batchScanResults: string | any[] = []
   let batchscanning = false;
 
   const scanBatchEmails = async () => {
@@ -251,10 +254,13 @@
       scanBatch(companyInfo[0].Company.employee_emails)
       .then((res) => {
         console.log(res)
+        batchScanResults = res
         batchscanning = false
       })
       
   }
+
+  
 
 </script>
 
@@ -347,6 +353,17 @@
             </div>
             
           </div>
+          {/if}
+        </div>
+        
+        <div class="batchResults">
+          {#if batchScanResults.length > 0}
+            {#each batchScanResults as leaks}
+            <h2>Leaks from {leaks.email}</h2>
+              <div class="scanresults">
+                <Results leaks={leaks.breaches}/>
+              </div>
+            {/each}
           {/if}
         </div>
         <h2>Employee Email Discovery</h2>
@@ -580,5 +597,14 @@
     justify-self: flex-start;
     text-decoration: underline;
     
+  }
+
+  .scanresults{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding-bottom: 10rem;
+    gap: 5rem;
+    height: min-content;
   }
 </style>
