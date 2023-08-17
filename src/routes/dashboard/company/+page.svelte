@@ -122,7 +122,8 @@
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
     if (!domain.includes("http://") && !domain.includes("https://")) {
-      throw Error("Invalid email format: provide http:// or https://");
+      alert('Invalid format: provide http:// or https://')
+      throw Error("Invalid domain format: provide http:// or https://");
     }
     const validEmails = [...emailArray.filter(email => emailRegex.test(email)), $user?.user.email];
 
@@ -150,13 +151,15 @@
               console.log(res);
               isModalOpen = false;
             });
+            goto("/dashboard/company");
           
         } else {
           console.log(res.error);
         }
+
       });
 
-    goto("/dashboard/company");
+    
   }
 
   onMount(() => {
@@ -402,7 +405,7 @@
               </label>
               <label for="domain">
                 Company Domain:
-                <input type="text" bind:value={domain} placeholder="ACME.com" />
+                <input type="text" bind:value={domain} placeholder="http://ACME.com" />
               </label>
               <label for="domain">
                 Employee Emails:

@@ -37,22 +37,31 @@
     onMount(() => {
       maxPages = Math.ceil(tableData.length / itemsPerPage);
     })
+
+    function nextPage() {
+      if (currentPage < maxPages - 1) {
+        currentPage++;
+      }
+    }
+
+    function prevPage() {
+      if (currentPage > 0) {
+        currentPage--;
+      }
+    }
+
+    // If using reactive statements to compute maxPages
+    $: maxPages = tableData ? Math.ceil(tableData.length / itemsPerPage) : 0;
 </script>
   
   {#if tableData && filteredData}
     <div class="tablecontainer">
         {#if maxPages > 1}
-        <div class="pagination">
-            Page:
-            {#each Array(maxPages) as _, i}
-            <button 
-                class="{currentPage === i ? 'active' : ''}" 
-                on:click={() => goToPage(i)}
-            >
-                {i + 1}
-            </button>
-            {/each}
-        </div>
+          <div class="pagination">
+              <button on:click={prevPage} disabled={currentPage === 0}>Previous</button>
+              <span>Page {currentPage + 1} of {maxPages}</span>
+              <button on:click={nextPage} disabled={currentPage === maxPages - 1}>Next</button>
+          </div>
         {/if}
         <div class="tablecontrols">
             <input type="text" bind:value={searchQuery} placeholder="Search..." />
@@ -92,6 +101,18 @@
 
 <style>
 
+  .pagination button{
+      background-color: var(--accent);
+      padding: 0.5rem 1rem;
+    }
+
+  .pagination button[disabled] {
+      opacity: 0.5;
+      cursor: not-allowed;
+  }
+
+  
+
     .tablecontrols{
         display: flex;
 
@@ -123,7 +144,8 @@
         justify-content: center;
         gap: 1rem;
         margin: 1rem 0;
-        align-items: center        
+        align-items: center;
+        overflow: scroll;        
     }
 
     .pagination > button{
