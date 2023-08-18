@@ -17,6 +17,21 @@
     import Loader from '../components/Loader.svelte';
     import { goto } from '$app/navigation';
 
+
+    // $: document.title = getTitle($page.route.id);
+
+    // function getTitle(route: string | null) {
+    //     switch(route) {
+    //         case '/': return 'ISAIX Dark Web Scanner | Ultimate Email & Company Security';
+    //         case '/unlock': return 'Unlock ISAIX | Secure Access to Dark Web Monitoring';
+    //         case '/news': return 'ISAIX News | Latest Updates on Dark Web Threats & Security';
+    //         case '/login': return 'Login to ISAIX | Secure Your Company Emails Today';
+    //         case '/dashboard': return 'ISAIX Dashboard | Monitor & Secure Your Email Real-time';
+    //         case '/dashboard/company': return 'Company Security Dashboard | ISAIX Multi-Email Monitoring';
+    //         default: return 'ISAIX Dark Web Scanner';  // Default title
+    //     }
+    // }
+
     const handleLogin = async () => {
         // const res = await supabase.auth.signInWithPassword({
         //     email: 'mackstathis@gmail.com',

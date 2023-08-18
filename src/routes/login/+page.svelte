@@ -91,6 +91,8 @@
 </script>
 
 <main>
+    <title>Login to ISAIX | Secure Your Company Emails Today</title>
+
     <div class="login">
         <h1>
             {#if signUpSwitch}
@@ -105,18 +107,18 @@
                 {#if signUpSwitch}
                     <label for="firstName">
                         First Name:
-                        <input type="text" required bind:value={firstName}>
+                        <input type="text" id="firstName" bind:value={firstName}>
                     </label>
                     <label for="lastName">
                         Last Name:
-                        <input type="text" required bind:value={lastName}>
+                        <input type="text" id="lastName" required bind:value={lastName}>
                     </label>
                 
                 {/if}
             </div>
             <label for="email">
                 Email:
-                <input type="text" required bind:value={email}>
+                <input type="text" id="email" required bind:value={email}>
             </label>
             <label for="password">
                 Password:

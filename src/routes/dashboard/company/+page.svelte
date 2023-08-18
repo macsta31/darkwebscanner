@@ -370,10 +370,14 @@
 
 {#if loading}
   <div class="loader">
+    <title>Company Security Dashboard | ISAIX Multi-Email Monitoring</title>
+
     <Loader />
   </div>
 {:else}
   <main>
+    <title>Company Security Dashboard | ISAIX Multi-Email Monitoring</title>
+
     {#if companyInfo}
       <h2>{companyInfo[0].Company.company_name}</h2>
       <h3>Registered Users</h3>

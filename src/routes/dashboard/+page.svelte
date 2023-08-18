@@ -68,6 +68,8 @@
 
 </script>
 
+<div>
+    <title>ISAIX Dashboard | Monitor & Secure Your Email Real-time</title>
 
     {#if breachData}
         {#if breachData[0]}
@@ -109,6 +111,7 @@
             <Loader />
         </div>
     {/if}
+</div>
 
 <style>
 

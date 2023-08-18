@@ -83,6 +83,7 @@
 </script>
 
 <div id="wrapper">
+  <title>ISAIX Dark Web Scanner | Ultimate Email & Company Security</title>
   {#if loaded}
     <section
       style="padding-bottom: 20rem;"

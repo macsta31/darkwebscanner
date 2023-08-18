@@ -25,6 +25,8 @@
 </script>
 
 <main>
+    <title>Unlock ISAIX | Secure Access to Dark Web Monitoring</title>
+
     <h1>Whats the magic word?</h1>
     {#if errorMessage}
         <h4 style="color: red;">{errorMessage}</h4>
