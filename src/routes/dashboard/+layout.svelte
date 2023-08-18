@@ -17,7 +17,6 @@
 
     let scanning:boolean = false
 
-    console.log($page)
     
     onMount(() => {
         if(!sessionStorage.getItem('token')){

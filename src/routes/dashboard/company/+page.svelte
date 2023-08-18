@@ -25,6 +25,8 @@
 
   let newEmails = "";
 
+  // $: console.log(companyInfo)
+
   async function updateCompanyEmails() {
     
     // Split the input by commas, then trim each email to remove whitespace
@@ -107,7 +109,7 @@
         },
       });
       const responseData = await response.json()
-      console.log(responseData)
+      // console.log(responseData)
       employeeEmailsFromSearch = responseData.profiles
     }
     catch(error){
@@ -148,7 +150,7 @@
               user_email: $user?.user.email,
             })
             .then((res) => {
-              console.log(res);
+              // console.log(res);
               isModalOpen = false;
             });
             goto("/dashboard/company");
@@ -162,6 +164,29 @@
     
   }
 
+  let downloadPresent = false
+
+  $: if (company_id) {
+    supabase
+      .from("User_Company")
+      .select(
+        `
+            *,
+            Users ( FirstName, LastName, auth_uuid ),
+            Company ( company_name, employee_emails )
+        `
+      )
+      .eq("company_id", company_id)
+      .then((res) => {
+        if (res.data?.length && res.data.length > 0) {
+          let counts;
+          getUserBreachCounts(res.data).then((res) => {
+            companyInfo = res;
+          });
+        }
+      });
+  }
+
   onMount(() => {
     supabase
       .from("Company")
@@ -170,10 +195,48 @@
       .then((res) => {
         if (res.data && res.data[0]) {
           company_id = res.data[0].id;
+          if (company_id) {
+            supabase
+              .from("User_Company")
+              .select(
+                `
+                    *,
+                    Users ( FirstName, LastName, auth_uuid ),
+                    Company ( company_name, employee_emails )
+                `
+              )
+              .eq("company_id", company_id)
+              .then((res) => {
+                if (res.data?.length && res.data.length > 0) {
+                  let counts;
+                  getUserBreachCounts(res.data).then((res) => {
+                    companyInfo = res;
+                    supabase
+                      .storage
+                      .from('company_breaches')
+                      .list(companyInfo[0].Company.company_name, {
+                        limit: 100,
+                        offset: 0,
+                        sortBy: { column: 'name', order: 'asc' }
+                      })
+                      .then((res) => {
+                        if(res.data && res.data.length > 0){
+                          downloadPresent = true
+                        }   
+                      })
+                      .catch((err) => {
+
+                      })
+                  });
+                }
+              });
+          }
         }
         loading = false;
       });
 
+
+    
 
     const Company = supabase.channel('custom-all-channel')
       .on(
@@ -210,26 +273,7 @@
     return output;
   }
 
-  $: if (company_id) {
-    supabase
-      .from("User_Company")
-      .select(
-        `
-            *,
-            Users ( FirstName, LastName, auth_uuid ),
-            Company ( company_name, employee_emails )
-        `
-      )
-      .eq("company_id", company_id)
-      .then((res) => {
-        if (res.data?.length && res.data.length > 0) {
-          let counts;
-          getUserBreachCounts(res.data).then((res) => {
-            companyInfo = res;
-          });
-        }
-      });
-  }
+
 
 
 
@@ -249,19 +293,76 @@
     addEmailsModal = true
   }
 
+  let uploadBlob: Blob | undefined = undefined
+  let uploading = false;
+  let uploaded = ''
+
+  // Upload file using standard upload
+  async function uploadFile(file: string | FormData | ArrayBuffer | ArrayBufferView | Blob | Buffer | File | NodeJS.ReadableStream | ReadableStream<Uint8Array> | URLSearchParams) {
+    uploading = true
+    const filePath = `${companyInfo[0].Company.company_name}/${companyInfo[0].Company.company_name}.json`;  // Define your file path and name
+    supabase.storage.from('company_breaches').upload(filePath, file, {
+      upsert: true
+    })
+    .then((res) => {
+      console.log(res)
+      uploading = false;
+      console.log('File uplaoded successfully: ', res.data)
+      goto('/dashboard/company')
+    })
+    .catch((err) => {
+      alert('Error uploading file')
+      console.error('Error uploading file:', err.err);
+    })
+  }
+
+  async function downloadFile(){
+    const { data, error } = await supabase
+      .storage
+      .from('company_breaches')
+      .download(`${companyInfo[0].Company.company_name}/${companyInfo[0].Company.company_name}.json`)
+    const fileBlob = data
+    if(fileBlob){
+      const url = window.URL.createObjectURL(fileBlob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = `${companyInfo[0].Company.company_name}_breachdata.json`;
+
+      // Append the anchor to the body and click it to start the download
+      document.body.appendChild(a);
+      a.click();
+
+      // Cleanup
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    }
+  }
+
   let batchScanResults: string | any[] = []
   let batchscanning = false;
 
-  const scanBatchEmails = async () => {
-      batchscanning = true
-      scanBatch(companyInfo[0].Company.employee_emails)
-      .then((res) => {
-        console.log(res)
-        batchScanResults = res
-        batchscanning = false
-      })
-      
+  
+
+  async function scanBatchEmails() {
+    batchscanning = true;
+    try {
+        const res = await scanBatch(companyInfo[0].Company.employee_emails);
+        batchScanResults = res;
+        batchscanning = false;
+
+        // Convert res to JSON string
+        const jsonContent = JSON.stringify(res, null, 2);
+
+        // Create a Blob from the JSON string
+        const blob = new Blob([jsonContent], { type: 'application/json' });
+        uploadBlob = blob
+        // Upload this Blob to Supabase
+    } catch (err) {
+        console.error('Error:', err);
+    }
   }
+
 
   
 
@@ -309,6 +410,18 @@
               <Loader />
             {:else}
               <button on:click={() => scanBatchEmails()} >Scan Emails</button>
+            {/if}
+            {#if uploadBlob}
+              <button on:click={() => {
+                if(uploadBlob){
+                  uploadFile(uploadBlob)
+                }
+                }}>Upload data to storage</button>
+            {:else if uploading}
+              <p>Uploading</p>
+            {/if}
+            {#if downloadPresent}
+                <button on:click={async () => {await downloadFile()}}>Download Breaches</button>
             {/if}
           </div>
           
@@ -359,7 +472,7 @@
           {/if}
         </div>
         
-        <div class="batchResults">
+        <!-- <div class="batchResults">
           {#if batchScanResults.length > 0}
             {#each batchScanResults as leaks}
             <h2>Leaks from {leaks.email}</h2>
@@ -368,7 +481,7 @@
               </div>
             {/each}
           {/if}
-        </div>
+        </div> -->
         <h2>Employee Email Discovery</h2>
         <h4>Click below to scan for employee emails available on the web</h4>
         {#if !emailSearching}
