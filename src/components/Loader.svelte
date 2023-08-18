@@ -11,10 +11,10 @@
 
 <style>
   .lds-ellipsis {
-    display: inline-block;
     position: relative;
     width: 80px;
     height: 80px;
+    padding: 2rem;
   }
   .lds-ellipsis div {
     position: absolute;
