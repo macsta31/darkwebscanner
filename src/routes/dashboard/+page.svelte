@@ -78,14 +78,10 @@
                 tableData={breachData} 
                 columns={[
                     {key: 'breach_identifier', name: 'Leak'},
+                    {key: 'Breach.BreachDate', name: 'Breach Date'},
                     {key: 'Breach.Domain', name: 'Domain', render: val => `<a href="https://${val}">${val}</a>`},
                     {key: 'Breach.PwnCount', name: 'Pwn Count'},
                     {key: 'Breach.IsVerified', name: 'Is Verified', render: val => val ? 'Verified' : 'Not Verified'},
-                    {key: 'IsAcknowledged', name: 'Acknowledged', render: val => `
-                    <label>
-                        <input type="checkbox" ${val ? "checked" : ""}>
-                    </label>
-                    `}
                 ]} 
             />
             
