@@ -326,19 +326,25 @@
       .download(`${companyInfo[0].Company.company_name}/${companyInfo[0].Company.company_name}.pdf`)
     const fileBlob = data
     if(fileBlob){
-      const url = window.URL.createObjectURL(fileBlob);
-      const a = document.createElement('a');
-      a.style.display = 'none';
-      a.href = url;
-      a.download = `${companyInfo[0].Company.company_name}_breachdata.pdf`;
+      try{
+        const url = window.URL.createObjectURL(fileBlob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = `${companyInfo[0].Company.company_name}_breachdata.pdf`;
 
-      // Append the anchor to the body and click it to start the download
-      document.body.appendChild(a);
-      a.click();
+        // Append the anchor to the body and click it to start the download
+        document.body.appendChild(a);
+        a.click();
 
-      // Cleanup
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+        // Cleanup
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      }
+      catch(error){
+        console.error(error)
+      }
+      
     }
   }
 
