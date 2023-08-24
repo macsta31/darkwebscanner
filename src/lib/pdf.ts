@@ -1,6 +1,6 @@
 // @ts-nocheck
 import pdfMake from "pdfmake/build/pdfmake";
-import pdfFonts from "pdfmake/build/vfs_fonts";
+
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
 
@@ -30,7 +30,7 @@ function convertHtmlToPdfMake(html) {
 }
 
 
-export const generatePDF = (jsonData) => {
+export async function generatePDF (jsonData){
     const content = [];
     content.push({ text: 'Data Breaches Report', style: 'title' });
 
