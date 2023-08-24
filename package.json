@@ -16,6 +16,7 @@
 		"@types/nodemailer": "^6.4.8",
 		"@types/nodemailer-mailgun-transport": "^1.4.3",
 		"@types/papaparse": "^5.3.7",
+		"@types/pdfmake": "^0.2.2",
 		"svelte": "^4.0.0",
 		"svelte-check": "^3.4.3",
 		"tslib": "^2.4.1",
@@ -42,6 +43,8 @@
 		"nodemailer": "^6.9.3",
 		"nodemailer-mailgun-transport": "^2.1.5",
 		"papaparse": "^5.4.1",
+		"pdfkit": "^0.13.0",
+		"pdfmake": "^0.2.7",
 		"svelte-email": "^0.0.4",
 		"tailwind-merge": "^1.13.2",
 		"web-vitals": "^3.3.2"

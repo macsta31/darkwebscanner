@@ -73,6 +73,7 @@
                     email: email,
                     password: password,
                 })
+                console.log(data)
                 if (!error){
                     goto(`/dashboard`)
                 }

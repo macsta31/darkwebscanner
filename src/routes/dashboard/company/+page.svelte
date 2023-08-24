@@ -8,6 +8,8 @@
   import Loader from "../../../components/Loader.svelte";
   import { goto } from "$app/navigation";
   import { page } from "$app/stores";
+  import { prospects } from "$lib/prospectsStore";
+  import { generatePDF } from "$lib/pdf";
   import Results from "../../../components/Results.svelte";
   let companyInfo: any;
   let isModalOpen = false;
@@ -109,7 +111,8 @@
         },
       });
       const responseData = await response.json()
-      // console.log(responseData)
+      console.log(responseData)
+      prospects.set(responseData.profiles)
       employeeEmailsFromSearch = responseData.profiles
     }
     catch(error){
@@ -300,7 +303,7 @@
   // Upload file using standard upload
   async function uploadFile(file: string | FormData | ArrayBuffer | ArrayBufferView | Blob | Buffer | File | NodeJS.ReadableStream | ReadableStream<Uint8Array> | URLSearchParams) {
     uploading = true
-    const filePath = `${companyInfo[0].Company.company_name}/${companyInfo[0].Company.company_name}.json`;  // Define your file path and name
+    const filePath = `${companyInfo[0].Company.company_name}/${companyInfo[0].Company.company_name}.pdf`;  // Define your file path and name
     supabase.storage.from('company_breaches').upload(filePath, file, {
       upsert: true
     })
@@ -320,14 +323,14 @@
     const { data, error } = await supabase
       .storage
       .from('company_breaches')
-      .download(`${companyInfo[0].Company.company_name}/${companyInfo[0].Company.company_name}.json`)
+      .download(`${companyInfo[0].Company.company_name}/${companyInfo[0].Company.company_name}.pdf`)
     const fileBlob = data
     if(fileBlob){
       const url = window.URL.createObjectURL(fileBlob);
       const a = document.createElement('a');
       a.style.display = 'none';
       a.href = url;
-      a.download = `${companyInfo[0].Company.company_name}_breachdata.json`;
+      a.download = `${companyInfo[0].Company.company_name}_breachdata.pdf`;
 
       // Append the anchor to the body and click it to start the download
       document.body.appendChild(a);
@@ -342,7 +345,10 @@
   let batchScanResults: string | any[] = []
   let batchscanning = false;
 
-  
+  async function generatePdfAndUpload() {
+      const pdfBlob = await generatePDF(batchScanResults);
+      uploadFile(pdfBlob);
+  }
 
   async function scanBatchEmails() {
     batchscanning = true;
@@ -353,6 +359,7 @@
 
         // Convert res to JSON string
         const jsonContent = JSON.stringify(res, null, 2);
+        console.log(jsonContent)
 
         // Create a Blob from the JSON string
         const blob = new Blob([jsonContent], { type: 'application/json' });
@@ -416,16 +423,14 @@
               <button on:click={() => scanBatchEmails()} >Scan Emails</button>
             {/if}
             {#if uploadBlob}
-              <button on:click={() => {
-                if(uploadBlob){
-                  uploadFile(uploadBlob)
-                }
-                }}>Upload data to storage</button>
+              <button on:click={async () => {await generatePdfAndUpload()}}>Generate & Upload PDF</button>
             {:else if uploading}
               <p>Uploading</p>
             {/if}
             {#if downloadPresent}
                 <button on:click={async () => {await downloadFile()}}>Download Breaches</button>
+                
+
             {/if}
           </div>
           

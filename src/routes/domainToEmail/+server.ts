@@ -10,7 +10,7 @@ async function searchRocketReach(employer:string) {
         const response = await fetch(API_URL, {
             method: 'POST',
             headers: {
-                'Api-Key': '10aa6a0kf60f6b27f60c63fdff4c8561d858304b',
+                'Api-Key': '10dbd74ke95147686a4cb03f98fe0b92e0bf0c6d',
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
@@ -31,6 +31,10 @@ async function searchRocketReach(employer:string) {
         console.error("There was a problem with the fetch operation:", error.message);
     }
 }
+
+// async function bulkPoepleLookup(people){
+
+// }
 
 export async function POST({ request }) {
     const { employer } = await request.json();
