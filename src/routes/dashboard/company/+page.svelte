@@ -351,8 +351,10 @@
   let batchScanResults: string | any[] = []
   let batchscanning = false;
 
+  
   async function generatePdfAndUpload() {
       const pdfBlob = await generatePDF(batchScanResults);
+      // @ts-ignore
       uploadFile(pdfBlob);
   }
 
@@ -498,18 +500,34 @@
           {/if}
         </div> -->
         <h2>Employee Email Discovery</h2>
-        <h4>Click below to scan for employee emails available on the web</h4>
-        {#if !emailSearching}
-          <button on:click|once={() => searchdomainToemail(companyInfo[0].Company.company_name)}>Search</button>
-        {:else}
-          <Loader />
-        {/if}
-        {#if employeeEmailsFromSearch}
+        {#if employeeEmailsFromSearch[0]}
+        <!-- <div class="potentialEmployees">
           {#each employeeEmailsFromSearch as employee}
-            <div>
-              {employee.name}
+          <div class="employeeWrapper">
+            <div class="potentialEmployee">
+              <div class="potentialEmployeeInfo">ID: {employee.id}</div>
+              <div class="potentialEmployeeInfo">Name: {employee.name}</div>
+              <div class="potentialEmployeeInfo">Title: {employee.normalized_title}</div>
             </div>
+          </div>
           {/each}
+        </div> -->
+          <Table
+            tableData={employeeEmailsFromSearch}
+            columns={[
+              { key: "id", name: "ID" },
+              { key: "name", name: "Name" },
+              { key: "normalized_title", name: "Title" },
+            ]}
+          />
+        {:else}
+          
+          <h4>Click below to scan for employee emails available on the web</h4>
+          {#if !emailSearching}
+            <button on:click|once={() => searchdomainToemail(companyInfo[0].Company.company_name)}>Search</button>
+          {:else}
+            <Loader />
+          {/if}
         {/if}
       </section>
     {:else}
@@ -549,6 +567,28 @@
 {/if}
 
 <style>
+
+  .potentialEmployees{
+    width: 100%;
+  }
+  .employeeWrapper{
+
+  }
+  .potentialEmployee{
+    background-color: var(--accent);
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 0.5rem;
+    justify-self: center;
+
+  }
+
+  .potentialEmployeeInfo{
+    width: max-content;
+    text-align: left;
+  }
 
 .pagination {
     display: flex;
