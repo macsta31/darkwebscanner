@@ -38,6 +38,7 @@
         if($user && $user.user.email){
             scanning = true
             const output = await scan($user.user.email)
+            console.log($user.user.id)
             saveToDB(output, $user.user.id).then((res) => scanning = false)
         }
 

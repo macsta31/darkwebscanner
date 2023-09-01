@@ -97,9 +97,10 @@
     displayedEmails = filteredEmails.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
   }
 
-  function removeHttpPrefix(domain:string) {
-      return domain.replace(/^https?:\/\//, '');
-  }
+  // function removeHttpPrefix(domain:string) {
+  //     console.log(domain)
+  //     return domain.replace(/^https?:\/\//, '');
+  // }
 
 
 
@@ -115,10 +116,10 @@
         },
       });
       const responseData = await response.json()
-      console.log(responseData)
+      // console.log(responseData)
       prospects.set(responseData.profiles)
       
-      employeeEmailsFromSearch = responseData.profiles.filter((profile:any) => profile.current_employer_domain === removeHttpPrefix(companyInfo[0].Company.domain))
+      employeeEmailsFromSearch = responseData.profiles.filter((profile:any) => profile.current_employer_domain === companyInfo[0].Company.domain.replace(/^https?:\/\//, ''))
     }
     catch(error){
       console.error(error)

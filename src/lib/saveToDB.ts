@@ -50,6 +50,7 @@ export default async function addBreachToDB(
         if (error) {
           console.error("Error in addBreachToDB:", error.message);
         } else {
+          
           // console.log((await supabase.auth.getUser()))
           if (uid) {
             const userBreachInsert = await supabase

@@ -36,6 +36,7 @@
   async function saveToDB() {
     // console.log($user)
     const uid = $user?.user.id;
+    console.log(uid)
     try{
         const response = await addBreachToDB(scanResult, uid);
         console.log(response);

@@ -26,6 +26,7 @@
             `)
             .eq('user_identifier', $user?.user.id)
             .then((res) => {
+                console.log(res)
                 breachData = res.data;
             })
 
