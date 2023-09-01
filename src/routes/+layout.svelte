@@ -52,7 +52,6 @@
         if($page.route.id !== '/'){
             goto('/')
         }
-        
     }
 
     let dashboardSwitch: string | undefined

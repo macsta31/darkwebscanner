@@ -27,7 +27,7 @@
 
   let newEmails = "";
 
-  // $: console.log(companyInfo)
+  $: console.log(companyInfo)
 
   async function updateCompanyEmails() {
     
@@ -97,6 +97,10 @@
     displayedEmails = filteredEmails.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
   }
 
+  function removeHttpPrefix(domain:string) {
+      return domain.replace(/^https?:\/\//, '');
+  }
+
 
 
 
@@ -113,7 +117,8 @@
       const responseData = await response.json()
       console.log(responseData)
       prospects.set(responseData.profiles)
-      employeeEmailsFromSearch = responseData.profiles
+      
+      employeeEmailsFromSearch = responseData.profiles.filter((profile:any) => profile.current_employer_domain === removeHttpPrefix(companyInfo[0].Company.domain))
     }
     catch(error){
       console.error(error)
@@ -176,7 +181,7 @@
         `
             *,
             Users ( FirstName, LastName, auth_uuid ),
-            Company ( company_name, employee_emails )
+            Company ( company_name, employee_emails, domain )
         `
       )
       .eq("company_id", company_id)
@@ -518,6 +523,7 @@
               { key: "id", name: "ID" },
               { key: "name", name: "Name" },
               { key: "normalized_title", name: "Title" },
+              { key: 'current_employer_domain', name: 'Employer Domain' }
             ]}
           />
         {:else}
