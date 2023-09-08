@@ -27,8 +27,6 @@
 
   let newEmails = "";
 
-  $: console.log(companyInfo)
-
   async function updateCompanyEmails() {
     
     // Split the input by commas, then trim each email to remove whitespace
@@ -105,7 +103,7 @@
 
 
 
-  const searchdomainToemail = async (companyName:string) => {
+  const searchdomainToemail = async (companyName:string, companyDomain:string) => {
     emailSearching = true
     try{
       const response = await fetch("/domainToEmail", {
@@ -118,8 +116,11 @@
       const responseData = await response.json()
       // console.log(responseData)
       prospects.set(responseData.profiles)
+
       
-      employeeEmailsFromSearch = responseData.profiles.filter((profile:any) => profile.current_employer_domain === companyInfo[0].Company.domain.replace(/^https?:\/\//, ''))
+      employeeEmailsFromSearch = responseData.profiles
+      .filter((profile: any) => profile.current_employer_domain === companyInfo[0].Company.domain)
+      .map((profile: any) => ({ ...profile, details: null }));
     }
     catch(error){
       console.error(error)
@@ -211,7 +212,7 @@
                 `
                     *,
                     Users ( FirstName, LastName, auth_uuid ),
-                    Company ( company_name, employee_emails )
+                    Company ( company_name, employee_emails, domain )
                 `
               )
               .eq("company_id", company_id)
@@ -302,6 +303,14 @@
     addEmailsModal = true
   }
 
+  function closeProspectModal() {
+    showModal = false;
+  }
+
+  function openProspectModal() {
+    showModal = true
+  }
+
   let uploadBlob: Blob | undefined = undefined
   let uploading = false;
   let uploaded = ''
@@ -384,9 +393,50 @@
     }
   }
 
+  let showModal = false;
+  let modalData:any;
+
+
+
+  async function fetchDetails(item: any) {
+      const response = await fetch("/prospectLookup", {
+        method: "POST",
+        body: JSON.stringify({'prospectId': item.id}),
+        headers: {
+            "Content-Type": "application/json",
+        },
+      });
+      const responseData = await response.json();
+      return responseData;
+    }
+
+    async function handleRowClick(item: any) {
+      try {
+        const details = await fetchDetails(item);
+        modalData = details; // Store fetched details in a reactive variable
+        console.log(modalData)
+        openProspectModal()   // Show the modal
+      } catch (error) {
+        console.error("There was an error fetching details:", error);
+      }
+    }
 
   
 
+
+
+  function addEmail(email: string) {
+    console.log(companyInfo[0])
+    supabase
+      .from('Company')
+      .update({ employee_emails: [...companyInfo[0].Company.employee_emails, email] })
+      .eq('id', companyInfo[0].company_id)
+      .select()
+      .then((response) => {
+        console.log(response.data, response.error)
+      })
+
+  }
 </script>
 
 {#if loading}
@@ -494,44 +544,38 @@
           </div>
           {/if}
         </div>
-        
-        <!-- <div class="batchResults">
-          {#if batchScanResults.length > 0}
-            {#each batchScanResults as leaks}
-            <h2>Leaks from {leaks.email}</h2>
-              <div class="scanresults">
-                <Results leaks={leaks.breaches}/>
-              </div>
-            {/each}
-          {/if}
-        </div> -->
+      
         <h2>Employee Email Discovery</h2>
         {#if employeeEmailsFromSearch[0]}
-        <!-- <div class="potentialEmployees">
-          {#each employeeEmailsFromSearch as employee}
-          <div class="employeeWrapper">
-            <div class="potentialEmployee">
-              <div class="potentialEmployeeInfo">ID: {employee.id}</div>
-              <div class="potentialEmployeeInfo">Name: {employee.name}</div>
-              <div class="potentialEmployeeInfo">Title: {employee.normalized_title}</div>
-            </div>
-          </div>
-          {/each}
-        </div> -->
-          <Table
+        <Table
             tableData={employeeEmailsFromSearch}
             columns={[
               { key: "id", name: "ID" },
               { key: "name", name: "Name" },
               { key: "normalized_title", name: "Title" },
-              { key: 'current_employer_domain', name: 'Employer Domain' }
+              { key: 'current_employer_domain', name: 'Employer Domain' },
+              { key: 'details', name: 'Details', render: (val) => val || 'Click to fetch' } 
             ]}
-          />
+            onRowClick={handleRowClick} 
+        />
+        {#if showModal}
+          <Modal on:close={closeProspectModal}>
+            <div id="prospectsDiv">
+              <h3>Potential Emails</h3>
+              {#each modalData as prospect}
+                <div class="prospectEmail">
+                  <p>{prospect['email']}</p>
+                  <button on:click|once={() => addEmail(prospect['email'])}>Add</button>
+                </div>
+              {/each}
+            </div>
+          </Modal>
+        {/if}
         {:else}
           
           <h4>Click below to scan for employee emails available on the web</h4>
           {#if !emailSearching}
-            <button on:click|once={() => searchdomainToemail(companyInfo[0].Company.company_name)}>Search</button>
+            <button on:click|once={() => searchdomainToemail(companyInfo[0].Company.company_name, companyInfo[0].Company.domain)}>Search</button>
           {:else}
             <Loader />
           {/if}
@@ -574,28 +618,23 @@
 {/if}
 
 <style>
+#prospectsDiv > *{
+  color: black;
+}
 
-  .potentialEmployees{
-    width: 100%;
-  }
-  .employeeWrapper{
+.prospectEmail > *{
+  color: black;
+}
 
-  }
-  .potentialEmployee{
-    background-color: var(--accent);
-    padding: 0.5rem;
-    display: flex;
-    align-items: center;
-    width: 100%;
-    gap: 0.5rem;
-    justify-self: center;
+.prospectEmail{
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem;
+}
 
-  }
-
-  .potentialEmployeeInfo{
-    width: max-content;
-    text-align: left;
-  }
+.prospectEmail > button {
+  color: white;
+}
 
 .pagination {
     display: flex;

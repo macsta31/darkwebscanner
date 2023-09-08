@@ -75,7 +75,7 @@
     {#if breachData}
         {#if breachData[0]}
             <main>
-                <Table 
+                <Table
                 tableData={breachData} 
                 columns={[
                     {key: 'breach_identifier', name: 'Leak'},

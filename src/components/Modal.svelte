@@ -37,6 +37,8 @@
     padding: 1em;
     border-radius: 0.3em;
     min-width: 500px;
+    max-height: 80vh;      /* You can adjust this value as needed */
+    overflow-y: auto; 
   }
   </style>
   
