@@ -133,9 +133,9 @@
     const emailArray = employeeEmails.split(",").map((email) => email.trim());
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
-    if (!domain.includes("http://") && !domain.includes("https://")) {
-      alert('Invalid format: provide http:// or https://')
-      throw Error("Invalid domain format: provide http:// or https://");
+    if (domain.includes("http://") && !domain.includes("https://")) {
+      alert('Invalid format: remove http:// or https:// from domain')
+      throw Error("Invalid domain format: do not provide http:// or https://");
     }
     const validEmails = [...emailArray.filter(email => emailRegex.test(email)), $user?.user.email];
 
@@ -602,7 +602,7 @@
               </label>
               <label for="domain">
                 Company Domain:
-                <input type="text" bind:value={domain} placeholder="http://ACME.com" />
+                <input type="text" bind:value={domain} placeholder="ACME.com" />
               </label>
               <label for="domain">
                 Employee Emails:
