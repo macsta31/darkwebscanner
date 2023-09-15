@@ -32,14 +32,14 @@ function convertHtmlToPdfMake(html) {
 
 export const generatePDF = (jsonData) => {
     const content = [];
-    content.push({ text: 'Data Breaches Report', style: 'title' });
+    content.push({ text: 'Data Breaches Report', style: 'header' });
 
     jsonData.forEach(item => {
         content.push({ text: `Email: ${item.email}`, style: 'email' });
         
         if (Array.isArray(item.breaches)) {
             item.breaches.forEach(breach => {
-                content.push({ text: breach.Name, style: 'subheader' });
+                content.push({ text: breach.Name, style: 'subheader'});
                 content.push({ text: `Domain: ${breach.Domain}` });
                 content.push({ text: `Breach Date: ${breach.BreachDate}` });
                 
@@ -53,11 +53,12 @@ export const generatePDF = (jsonData) => {
                     });
                 }
                 content.push({ text: breach.IsVerified ? 'Verified' : 'Not Verified', style: 'verifiedStatus' });
-                content.push({ canvas: [{ type: 'line', x1: 0, y1: 5, x2: 515, y2: 5, lineWidth: 1 }] }); // Horizontal line
+                content.push({ canvas: [{ type: 'line', x1: 0, y1: 5, x2: 515, y2: 5, lineWidth: 1 }]}); // Horizontal line
             });
         } else {
             content.push({ text: 'No breaches for this email', style: 'noBreaches' });
         }
+        content.push({text: '', pageBreak: 'after'})
     });
 
     const docDefinition = {
@@ -66,8 +67,9 @@ export const generatePDF = (jsonData) => {
             header: {
                 fontSize: 24,
                 bold: true,
-                margin: [0, 0, 0, 20],
-                color: '#007BFF'
+                margin: [0, 100, 0, 0],
+                color: '#007BFF',
+                alignment: 'center'
             },
             subheader: {
                 fontSize: 20,
@@ -87,6 +89,16 @@ export const generatePDF = (jsonData) => {
             text: {
                 fontSize: 14,
                 margin: [0, 5, 0, 5]
+            },
+            email: {
+                fontSize: 20,
+                margin: [0, 5, 0, 5],
+                bold: true,
+            },
+            noBreaches: {
+                fontSize: 18,
+                margin: [0, 5, 0, 5],
+                bold: true,
             }
         }
     };
