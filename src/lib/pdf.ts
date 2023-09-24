@@ -33,9 +33,17 @@ function convertHtmlToPdfMake(html) {
 export const generatePDF = (jsonData) => {
     const content = [];
     content.push({ text: 'Data Breaches Report', style: 'header' });
+    content.push(
+        {
+            toc: {
+              // id: 'mainToc'  // optional
+              title: {text: 'INDEX', style: 'header'}
+            }, pageBreak: 'after'
+        }
+    )
 
     jsonData.forEach(item => {
-        content.push({ text: `Email: ${item.email}`, style: 'email' });
+        content.push({ text: `${item.email}`, style: 'email', tocItem: true });
         
         if (Array.isArray(item.breaches)) {
             item.breaches.forEach(breach => {

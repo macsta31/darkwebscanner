@@ -25,6 +25,8 @@
 
   let addEmailsModal = false;
 
+  let editCompanyModal = false;
+
   let newEmails = "";
 
   async function updateCompanyEmails() {
@@ -255,7 +257,10 @@
         (payload) => {
           if(payload.eventType = "UPDATE"){
             // @ts-ignore
-            companyInfo[0].Company.employee_emails = payload.new.employee_emails
+            if(companyInfo){
+              // @ts-ignore
+              companyInfo[0].Company.employee_emails = payload.new.employee_emails
+            }
           }
         }
       )
@@ -382,7 +387,6 @@
 
         // Convert res to JSON string
         const jsonContent = JSON.stringify(res, null, 2);
-        console.log(jsonContent)
 
         // Create a Blob from the JSON string
         const blob = new Blob([jsonContent], { type: 'application/json' });
@@ -437,6 +441,56 @@
       })
 
   }
+
+  function openEditModal(){
+    editCompanyModal = true;
+  }
+
+  function closeEditModal(){
+    editCompanyModal = false;
+  }
+
+  let newCompanyDomain:string;
+  let newCompanyName:string;
+
+  function submitCompanyEdits(){
+    // console.log(companyInfo[0].company_id)
+    supabase
+      .from('Company')
+      .update({ company_name: newCompanyName, domain: newCompanyDomain })
+      .eq('id', companyInfo[0].company_id)
+      .select()
+      .then((res) => {
+        if(res.error){
+          alert(res.error)
+        }
+        else{
+          let oldFileLocation = `${companyInfo[0].Company.company_name}/${companyInfo[0].Company.company_name}.pdf`
+          let newFileLocation = `${newCompanyName}/${newCompanyName}.pdf`
+            supabase
+              .storage
+              .from('company_breaches')
+              .move(oldFileLocation, newFileLocation)
+              .then((res) => {
+                console.log(res)
+              })
+
+          goto('/dashboard/company')
+        }
+      })
+
+  }
+
+  function clearEmails(){
+    supabase
+      .from('Company')
+      .update({ employee_emails: [] })
+      .eq('id', companyInfo[0].company_id)
+      .select()
+      .then((response) => {
+        console.log(response.data, response.error)
+      })
+  }
 </script>
 
 {#if loading}
@@ -451,7 +505,31 @@
 
     {#if companyInfo}
       <h2>{companyInfo[0].Company.company_name}</h2>
-      <h3>Registered Users</h3>
+      <div class="companyControls">
+        <h3>Registered Users</h3>
+        <button on:click={openEditModal}>Edit Company</button>
+      </div>
+      {#if editCompanyModal}
+        <Modal on:close={closeEditModal}>
+          <div class="modal">
+            <h2 style="text-align: center;">Company Edit Modal</h2>
+            <form action="" on:submit|preventDefault={submitCompanyEdits}>
+              <label for="company_name">
+                Company Name:
+                <input type="text" placeholder={companyInfo[0].Company.company_name} bind:value={newCompanyName}>
+              </label>
+              <label for="domain">
+                Domain:
+                <input type="text" placeholder={companyInfo[0].Company.domain} bind:value={newCompanyDomain}>
+              </label>
+              <div style="display: flex; justify-content: center">
+                <button class="" type="submit">Submit Changes</button>
+              </div>
+              
+            </form>
+          </div>
+        </Modal>
+      {/if}
       <Table
         tableData={companyInfo}
         columns={[
@@ -496,6 +574,7 @@
                 
 
             {/if}
+            <button on:click={clearEmails}>Reset Emails</button>
           </div>
           
           
@@ -618,6 +697,13 @@
 {/if}
 
 <style>
+
+  .companyControls{
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    align-items: center;
+  }
 #prospectsDiv > *{
   color: black;
 }

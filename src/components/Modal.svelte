@@ -39,6 +39,7 @@
     min-width: 500px;
     max-height: 80vh;      /* You can adjust this value as needed */
     overflow-y: auto; 
+    z-index: 999;
   }
   </style>
   
