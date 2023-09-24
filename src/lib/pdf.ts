@@ -43,7 +43,7 @@ export const generatePDF = (jsonData) => {
     )
 
     jsonData.forEach(item => {
-        content.push({ text: `${item.email}`, style: 'email', tocItem: true });
+        content.push({ text: `${item.email} (${item.breaches.length})`, style: 'email', tocItem: true });
         
         if (Array.isArray(item.breaches)) {
             item.breaches.forEach(breach => {
